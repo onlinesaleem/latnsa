@@ -1,69 +1,312 @@
 generator client {
-provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
-
 
 datasource db {
-provider = "postgresql"
-url = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-
+// NextAuth Models
 model User {
-id String @id @default(cuid())
-name String?
-email String? @unique
-emailVerified DateTime?
-image String?
-// Credentials auth
-passwordHash String?
-
-
-accounts Account[]
-sessions Session[]
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  
+  // User role for admin access
+  role          UserRole  @default(USER)
+  
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Assessment related
+  assessments   Assessment[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
-
 
 model Account {
-id String @id @default(cuid())
-userId String
-type String
-provider String
-providerAccountId String
-refresh_token String? @db.Text
-access_token String? @db.Text
-expires_at Int?
-token_type String?
-scope String?
-id_token String? @db.Text
-session_state String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-
-@@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
-
 
 model Session {
-id String @id @default(cuid())
-sessionToken String @unique
-userId String
-expires DateTime
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
 
-
-user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-
 model VerificationToken {
-identifier String
-token String @unique
-expires DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
+  @@unique([identifier, token])
+}
 
-@@unique([identifier, token])
+// OTP Verification Model
+model OtpVerification {
+  id          String      @id @default(cuid())
+  identifier  String      // phone or email
+  otp         String
+  expires     DateTime
+  verified    Boolean     @default(false)
+  attempts    Int         @default(0)
+  type        OtpType     @default(EMAIL)
+  
+  createdAt   DateTime    @default(now())
+  
+  @@unique([identifier, otp])
+}
+
+// Assessment Models
+model Assessment {
+  id              String           @id @default(cuid())
+  
+  // Registration details
+  registrantName  String
+  registrantEmail String?
+  registrantPhone String?
+  
+  // Form type and language
+  formType        FormType         @default(SELF)
+  language        Language         @default(ENGLISH)
+  
+  // Subject details (for proxy submissions)
+  subjectName     String?
+  subjectAge      Int?
+  subjectGender   Gender?
+  relationship    String?          // relationship to registrant if proxy
+  
+  // Assessment data
+  responses       AssessmentResponse[]
+  
+  // Status tracking
+  status          AssessmentStatus @default(SUBMITTED)
+  isReviewed      Boolean          @default(false)
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  reviewNotes     String?
+    // Clinical review fields
+  clinicalScore   String?          // Clinical assessment score
+  recommendations String?          // Clinical recommendations
+  // Timestamps
+  submittedAt     DateTime         @default(now())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  // Relations
+  userId          String?
+  user            User?            @relation(fields: [userId], references: [id])
+  
+  // Notifications
+  notifications   Notification[]
+}
+
+model AssessmentResponse {
+  id            String     @id @default(cuid())
+  assessmentId  String
+  questionId    String
+  questionText  String     // Store question text for historical purposes
+  answerValue   String     // JSON string for complex answers
+  answerType    AnswerType
+  
+  assessment    Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime   @default(now())
+}
+
+// Question Management (for dynamic forms)
+model QuestionGroup {
+  id            String     @id @default(cuid())
+  name          String
+  nameAr        String     // Arabic translation
+  description   String?
+  descriptionAr String?    // Arabic translation
+  order         Int
+  isActive      Boolean    @default(true)
+  
+  // YouTube video for explanations
+  videoUrl      String?
+  
+  questions     Question[]
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Question {
+  id              String        @id @default(cuid())
+  questionGroupId String
+  
+  // Question content
+  text            String
+  textAr          String        // Arabic translation
+  description     String?
+  descriptionAr   String?       // Arabic translation
+  
+  // Question configuration
+  type            QuestionType
+  isRequired      Boolean       @default(false)
+  order           Int
+  isActive        Boolean       @default(true)
+  
+  // Answer options (for multiple choice, etc.)
+  options         String?       // JSON string for options with translations
+  
+  // Validation rules
+  validationRules String?       // JSON string for validation rules
+  
+  questionGroup   QuestionGroup @relation(fields: [questionGroupId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// Notification System
+model Notification {
+  id           String           @id @default(cuid())
+  assessmentId String
+  type         NotificationType
+  recipient    String           // email address
+  subject      String
+  content      String           @db.Text
+  
+  // Status
+  sent         Boolean          @default(false)
+  sentAt       DateTime?
+  error        String?
+  
+  assessment   Assessment       @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime         @default(now())
+}
+
+// Phase 2 Models (Future)
+model Appointment {
+  id           String           @id @default(cuid())
+  patientName  String
+  patientEmail String
+  patientPhone String?
+  
+  type         AppointmentType
+  status       AppointmentStatus @default(SCHEDULED)
+  
+  // Appointment details
+  scheduledAt  DateTime
+  duration     Int              @default(30) // minutes
+  notes        String?
+  
+  // Virtual appointment details
+  meetingUrl   String?
+  meetingId    String?
+  
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+  CLINICAL_STAFF
+}
+
+enum OtpType {
+  EMAIL
+  SMS
+  // Will add SMS support with Unifonic later
+}
+
+enum FormType {
+  SELF
+  PROXY
+}
+
+enum Language {
+  ENGLISH
+  ARABIC
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AssessmentStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  COMPLETED
+  ARCHIVED
+}
+
+enum AnswerType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  DATE
+  SCALE
+  JSON
+}
+
+enum QuestionType {
+  TEXT
+  TEXTAREA
+  NUMBER
+  EMAIL
+  PHONE
+  DATE
+  SINGLE_SELECT
+  MULTI_SELECT
+  CHECKBOX
+  RADIO
+  SCALE
+  BOOLEAN
+}
+
+enum NotificationType {
+  ASSESSMENT_SUBMITTED
+  ASSESSMENT_REVIEWED
+  REMINDER
+  SYSTEM
+}
+
+enum AppointmentType {
+  LAB_TESTING
+  VIRTUAL_CONSULTATION
+  VIDEO_CALL
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
 }
