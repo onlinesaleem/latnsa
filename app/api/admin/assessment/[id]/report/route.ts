@@ -17,11 +17,11 @@ const reportRequestSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }>}
 ) {
   try {
     const session = await getServerSession(authOptions)
-    
+     
     if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'CLINICAL_STAFF')) {
       return NextResponse.json(
         { error: 'Access denied' },
@@ -31,10 +31,11 @@ export async function POST(
 
     const body = await request.json()
     const options = reportRequestSchema.parse(body)
+ const { id } = await context.params; // 👈 await here
 
     // Get assessment with responses
     const assessment = await prisma.assessment.findUnique({
-      where: { id: params.id },
+      where: { id},
       include: {
         responses: {
           orderBy: { createdAt: 'asc' }

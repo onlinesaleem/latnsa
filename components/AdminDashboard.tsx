@@ -39,6 +39,14 @@ interface Assessment {
   }
 }
 
+interface ReportFormData {
+  assessmentId: string
+  language: string
+  reportType: string
+  fromDate: string
+  toDate: string
+}
+
 interface DashboardStats {
   total: number
   pending: number
@@ -66,7 +74,14 @@ export default function AdminDashboard() {
   const [formTypeFilter, setFormTypeFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
-
+  const [reportLoading, setReportLoading] = useState<string | null>(null)
+ const [reportForm, setReportForm] = useState<ReportFormData>({
+    assessmentId: '',
+    language: 'english',
+    reportType: 'summary',
+    fromDate: '',
+    toDate: ''
+  })
   // Check admin access
   useEffect(() => {
     if (status === 'loading') return
@@ -156,6 +171,48 @@ export default function AdminDashboard() {
   // Handle assessment review
   const handleViewAssessment = (assessmentId: string) => {
     router.push(`/admin/assessment/${assessmentId}`)
+  }
+  // Handle assessment review
+  const handleDownload = async (assessmentId: string) => {
+    //router.push(`/admin/assessment/${assessmentId}/report`)
+
+   setReportLoading(assessmentId)
+    try {
+      const response = await fetch(`/api/admin/assessment/${assessmentId}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          //format,
+          language: reportForm.language,
+          includeCharts: true,
+          includeClinicalNotes: true
+        })
+      })
+
+      if (response.ok) {
+      
+          // Download PDF
+          const blob = await response.blob()
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `assessment-report-${reportForm.assessmentId}.pdf`
+          document.body.appendChild(a)
+          a.click()
+          window.URL.revokeObjectURL(url)
+          document.body.removeChild(a)
+          toast.success('Report downloaded successfully')
+       
+      } else {
+        const errorData = await response.json()
+        toast.error(errorData.error || 'Failed to generate report')
+      }
+    } catch (error) {
+      console.error('Error generating report:', error)
+      toast.error('Error generating report')
+    } finally {
+      setReportLoading(null)
+    }
   }
 
   if (status === 'loading' || loading) {
@@ -316,6 +373,9 @@ export default function AdminDashboard() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
+                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    DownloadReport
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -369,6 +429,15 @@ export default function AdminDashboard() {
                         >
                           <Eye className="w-4 h-4 mr-1" />
                           Review
+                        </button>
+                      </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => handleDownload(assessment.id)}
+                          className="flex items-center text-blue-600 hover:text-blue-900"
+                        >
+                          <Download className="w-4 h-4 mr-1" />
+                          Download
                         </button>
                       </td>
                     </tr>
