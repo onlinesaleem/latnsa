@@ -5,126 +5,226 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, emailTemplates } from '@/lib/email'
 import { z } from 'zod'
-import { AnswerType, Language, Gender } from '@prisma/client'
+import { Language, AssessmentStatus, NotificationType, AnswerType } from '@prisma/client'
 
 const submitAssessmentSchema = z.object({
+  patientId: z.string(),
   formType: z.enum(['SELF', 'PROXY']),
-  language: z.enum(['english', 'arabic']),
-  proxyDetails: z.object({
-    subjectName: z.string().optional(),
-    subjectAge: z.string().optional(),
-    subjectGender: z.string().optional(),
-    relationship: z.string().optional()
+  language: z.enum(['ENGLISH', 'ARABIC']),
+  proxyInfo: z.object({
+    proxyName: z.string(),
+    proxyEmail: z.string().optional(),
+    proxyPhone: z.string().optional(),
+    proxyRelationship: z.string()
   }).optional().nullable(),
-  responses: z.record(z.string(), z.any()),
-  isComplete: z.boolean()
+  responses: z.record(z.string(), z.any())
 })
+
+// Generate Assessment Number
+async function generateAssessmentNumber(): Promise<string> {
+  const year = new Date().getFullYear()
+  
+  const lastAssessment = await prisma.assessment.findFirst({
+    where: { 
+      assessmentNumber: { startsWith: `ASM-${year}-` } 
+    },
+    orderBy: { createdAt: 'desc' }
+  })
+  
+  const nextNumber = lastAssessment 
+    ? parseInt(lastAssessment.assessmentNumber.split('-')[2]) + 1 
+    : 1
+    
+  return `ASM-${year}-${String(nextNumber).padStart(5, '0')}`
+}
+
+// Helper function to determine answer type
+// Helper function to determine answer type
+function determineAnswerType(value: any, questionType?: string): AnswerType {
+  if (Array.isArray(value)) return AnswerType.MULTIPLE_CHOICE
+  if (typeof value === 'boolean') return AnswerType.BOOLEAN
+  if (typeof value === 'number') return AnswerType.NUMBER
+  if (questionType === 'DATE') return AnswerType.DATE
+  if (questionType === 'SCALE') return AnswerType.SCALE
+  return AnswerType.TEXT
+}
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    const body = await request.json()
-    const validatedData = submitAssessmentSchema.parse(body)
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Unauthorized', errorAr: 'غير مصرح' },
+        { status: 401 }
+      )
+    }
 
-    // Save the assessment (reuse logic from save-progress)
-    let assessment = await prisma.assessment.findFirst({
-      where: {
-        userId: session?.user.id,
-        status: 'DRAFT'
-      }
+    const body = await request.json()
+    
+    console.log('Submit assessment request:', {
+      patientId: body.patientId,
+      formType: body.formType,
+      hasProxyInfo: !!body.proxyInfo,
+      responseCount: Object.keys(body.responses || {}).length
     })
 
-    const assessmentData = {
-      formType: validatedData.formType,
-      language: validatedData.language === 'arabic' ? Language.ARABIC : Language.ENGLISH,
-      registrantName: session?.user.name || 'Anonymous',
-      registrantEmail: session?.user.email || null,
-      subjectName: validatedData.proxyDetails?.subjectName || null,
-      subjectAge: validatedData.proxyDetails?.subjectAge ? parseInt(validatedData.proxyDetails.subjectAge) : null,
-      subjectGender: validatedData.proxyDetails?.subjectGender
-        ? (validatedData.proxyDetails.subjectGender.toUpperCase() === 'MALE'
-            ? Gender.MALE
-            : Gender.FEMALE)
-        : null,
-      relationship: validatedData.proxyDetails?.relationship || null,
-      status: 'SUBMITTED' as import('@prisma/client').AssessmentStatus,
-      userId: session?.user.id || null,
-      submittedAt: new Date()
+    const validatedData = submitAssessmentSchema.parse(body)
+
+    // Verify patient exists
+    const patient = await prisma.patient.findUnique({
+      where: { id: validatedData.patientId }
+    })
+
+    if (!patient) {
+      return NextResponse.json(
+        { 
+          error: 'Patient not found',
+          errorAr: 'المريض غير موجود'
+        },
+        { status: 404 }
+      )
     }
 
-    if (assessment) {
-      assessment = await prisma.assessment.update({
-        where: { id: assessment.id },
-        data: assessmentData
-      })
-    } else {
-      assessment = await prisma.assessment.create({
-        data: assessmentData
-      })
-    }
+    // Generate assessment number
+    const assessmentNumber = await generateAssessmentNumber()
 
-    // Save responses (same as save-progress)
-    for (const [questionId, answerValue] of Object.entries(validatedData.responses)) {
-      if (answerValue !== undefined && answerValue !== null && answerValue !== '') {
-        const existingResponse = await prisma.assessmentResponse.findFirst({
-          where: {
-            assessmentId: assessment.id,
-            questionId: questionId
-          }
-        })
-        const question = await prisma.question.findUnique({
-          where: { id: questionId }
-        })
-        const responseData = {
-          assessmentId: assessment.id,
-          questionId: questionId,
-          questionText: question?.text || `Question ${questionId}`,
-          answerValue: typeof answerValue === 'object' ? JSON.stringify(answerValue) : String(answerValue),
-          answerType: Array.isArray(answerValue) ? AnswerType.MULTIPLE_CHOICE : AnswerType.TEXT
+    // Create assessment with responses in a transaction
+    const assessment = await prisma.$transaction(async (tx) => {
+      // Create the assessment
+      const newAssessment = await tx.assessment.create({
+        data: {
+          assessmentNumber,
+          patientId: validatedData.patientId,
+          formType: validatedData.formType,
+          language: validatedData.language,
+          submittedBy: session.user.id,
+          
+          // Proxy details (only if PROXY)
+          proxyRelationship: validatedData.formType === 'PROXY' 
+            ? validatedData.proxyInfo?.proxyRelationship 
+            : null,
+          proxyName: validatedData.formType === 'PROXY' 
+            ? validatedData.proxyInfo?.proxyName 
+            : null,
+          proxyEmail: validatedData.formType === 'PROXY' 
+            ? validatedData.proxyInfo?.proxyEmail 
+            : null,
+          proxyPhone: validatedData.formType === 'PROXY' 
+            ? validatedData.proxyInfo?.proxyPhone 
+            : null,
+          
+          status: AssessmentStatus.SUBMITTED,
+          priority: 'NORMAL',
+          submittedAt: new Date()
         }
+      })
 
-        if (existingResponse) {
-          await prisma.assessmentResponse.update({
-            where: { id: existingResponse.id },
-            data: responseData
+      // Create assessment responses
+      if (validatedData.responses && Object.keys(validatedData.responses).length > 0) {
+        const questionIds = Object.keys(validatedData.responses)
+        const questions = await tx.question.findMany({
+          where: { id: { in: questionIds } }
+        })
+
+        const questionMap = new Map(
+          questions.map(q => [q.id, { text: q.text, textAr: q.textAr, type: q.type }])
+        )
+
+        const responseRecords = Object.entries(validatedData.responses)
+          .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+          .map(([questionId, answerValue]) => {
+            const question = questionMap.get(questionId)
+            
+            return {
+              assessmentId: newAssessment.id,
+              questionId,
+              questionText: question?.text || 'Question not found',
+              answerValue: typeof answerValue === 'object' 
+                ? JSON.stringify(answerValue) 
+                : String(answerValue),
+              answerType: determineAnswerType(answerValue, question?.type)
+            }
           })
-        } else {
-          await prisma.assessmentResponse.create({
-            data: responseData
+
+        if (responseRecords.length > 0) {
+          await tx.assessmentResponse.createMany({
+            data: responseRecords
           })
         }
       }
-    }
 
-    // Send notification emails
+      // Create notification records
+      const notifications = []
+
+      // Notification for admin
+      if (process.env.ADMIN_EMAIL) {
+        notifications.push({
+          assessmentId: newAssessment.id,
+          type: NotificationType.ASSESSMENT_SUBMITTED,
+          recipient: process.env.ADMIN_EMAIL,
+          subject: `New Assessment Submission - ${assessmentNumber}`,
+          content: `Assessment ${assessmentNumber} has been submitted.\n\nPatient: ${patient.fullName}\nMRN: ${patient.mrn}\nSubmitted by: ${session.user.name || session.user.email}`
+        })
+      }
+
+      // Notification for clinical team
+      if (process.env.CLINICAL_EMAIL) {
+        notifications.push({
+          assessmentId: newAssessment.id,
+          type: NotificationType.ASSESSMENT_SUBMITTED,
+          recipient: process.env.CLINICAL_EMAIL,
+          subject: `Clinical Review Required - ${assessmentNumber}`,
+          content: `Assessment ${assessmentNumber} requires clinical review.\n\nPatient: ${patient.fullName}\nMRN: ${patient.mrn}\nForm Type: ${validatedData.formType}\nSubmitted At: ${new Date().toLocaleString()}`
+        })
+      }
+
+      if (notifications.length > 0) {
+        await tx.notification.createMany({
+          data: notifications
+        })
+      }
+
+      return newAssessment
+    })
+
+    // Send notification emails (outside transaction, non-blocking)
     const emailPromises = []
 
-    // 1. Confirmation email to user
-    if (assessment.registrantEmail) {
+    // 1. Confirmation email to patient/submitter
+    const recipientEmail = validatedData.formType === 'SELF' 
+      ? patient.email 
+      : validatedData.proxyInfo?.proxyEmail
+
+    if (recipientEmail) {
       const confirmationTemplate = emailTemplates.assessmentConfirmation({
-        registrantName: assessment.registrantName || 'User',
+        registrantName: validatedData.formType === 'SELF' 
+          ? patient.fullName 
+          : validatedData.proxyInfo?.proxyName || 'User',
         assessmentId: assessment.id,
         submittedAt: assessment.submittedAt?.toISOString() || new Date().toISOString(),
-        language: validatedData.language
+        language: validatedData.language === Language.ARABIC ? 'arabic' : 'english'
       })
 
       emailPromises.push(
         sendEmail({
-          to: assessment.registrantEmail,
+          to: recipientEmail,
           subject: confirmationTemplate.subject,
           html: confirmationTemplate.html
-        })
+        }).catch(err => console.error('Failed to send confirmation email:', err))
       )
     }
 
-    // 2. Notification to client (Latnsa)
+    // 2. Notification to admin
     if (process.env.ADMIN_EMAIL) {
       const clientTemplate = emailTemplates.assessmentNotificationClient({
-        registrantName: assessment.registrantName || 'Anonymous',
+        registrantName: validatedData.formType === 'SELF' 
+          ? patient.fullName 
+          : validatedData.proxyInfo?.proxyName || 'Anonymous',
         assessmentId: assessment.id,
         submittedAt: assessment.submittedAt?.toISOString() || new Date().toISOString(),
         formType: assessment.formType,
-        subjectName: assessment.subjectName || undefined
+        subjectName: patient.fullName
       })
 
       emailPromises.push(
@@ -132,18 +232,20 @@ export async function POST(request: NextRequest) {
           to: process.env.ADMIN_EMAIL,
           subject: clientTemplate.subject,
           html: clientTemplate.html
-        })
+        }).catch(err => console.error('Failed to send admin email:', err))
       )
     }
 
     // 3. Notification to clinical team
     if (process.env.CLINICAL_EMAIL) {
       const clinicalTemplate = emailTemplates.assessmentNotificationClinical({
-        registrantName: assessment.registrantName || 'Anonymous',
+        registrantName: validatedData.formType === 'SELF' 
+          ? patient.fullName 
+          : validatedData.proxyInfo?.proxyName || 'Anonymous',
         assessmentId: assessment.id,
         submittedAt: assessment.submittedAt?.toISOString() || new Date().toISOString(),
         formType: assessment.formType,
-        subjectName: assessment.subjectName || undefined,
+        subjectName: patient.fullName,
         priority: 'Normal'
       })
 
@@ -152,53 +254,24 @@ export async function POST(request: NextRequest) {
           to: process.env.CLINICAL_EMAIL,
           subject: clinicalTemplate.subject,
           html: clinicalTemplate.html
-        })
+        }).catch(err => console.error('Failed to send clinical email:', err))
       )
     }
 
-    // Send all emails
-    try {
-      await Promise.all(emailPromises)
-      console.log('All notification emails sent successfully')
-    } catch (emailError) {
-      console.error('Some emails failed to send:', emailError)
-      // Don't fail the assessment submission if emails fail
+    // Send all emails (non-blocking)
+    if (emailPromises.length > 0) {
+      Promise.all(emailPromises)
+        .then(() => console.log('All notification emails sent successfully'))
+        .catch(err => console.error('Some emails failed to send:', err))
     }
-
-    // Create notification records
-    // Import NotificationType enum from your Prisma client or define it if needed
-    // import { NotificationType } from '@prisma/client'
-
-    const notifications = [
-      {
-        assessmentId: assessment.id,
-        type: 'ASSESSMENT_SUBMITTED' as any, // Replace 'any' with NotificationType if imported
-        recipient: process.env.ADMIN_EMAIL || 'admin@latnsa.com',
-        subject: 'New Assessment Submission',
-        content: `Assessment ${assessment.id} submitted by ${assessment.registrantName}`,
-        sent: true,
-        sentAt: new Date()
-      },
-      {
-        assessmentId: assessment.id,
-        type: 'ASSESSMENT_SUBMITTED' as any, // Replace 'any' with NotificationType if imported
-        recipient: process.env.CLINICAL_EMAIL || 'clinical@latnsa.com',
-        subject: 'Clinical Review Required',
-        content: `Assessment ${assessment.id} requires clinical review`,
-        sent: true,
-        sentAt: new Date()
-      }
-    ]
-
-    await prisma.notification.createMany({
-      data: notifications
-    })
 
     return NextResponse.json({
       success: true,
       message: 'Assessment submitted successfully',
       messageAr: 'تم إرسال التقييم بنجاح',
       assessmentId: assessment.id,
+      assessmentNumber: assessment.assessmentNumber,
+      patientMRN: patient.mrn,
       submittedAt: assessment.submittedAt
     })
 

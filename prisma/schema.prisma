@@ -21,9 +21,12 @@ model User {
   
   accounts      Account[]
   sessions      Session[]
+
+   // NEW: User can be a patient themselves
+  patientProfile Patient?
   
-  // Assessment related
-  assessments   Assessment[]
+  // MODIFIED: User can submit assessments (as themselves or proxy)
+  submittedAssessments Assessment[] @relation("SubmittedBy")
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -65,6 +68,43 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+
+// ===== PATIENT MANAGEMENT =====
+
+model Patient {
+  id              String      @id @default(cuid())
+  
+  // Medical Record Number - Auto-generated, human-readable
+  mrn             String      @unique @default(cuid()) // You'll override this with custom logic
+  
+  // Demographics
+  fullName        String
+  dateOfBirth     DateTime?
+  gender          Gender?
+  
+  // Contact Information
+  email           String?
+  phone           String?
+  address         String?
+  
+  // If this patient is also a system user (for SELF assessments)
+  userId          String?     @unique
+  user            User?       @relation(fields: [userId], references: [id])
+  
+  // Medical History
+  assessments     Assessment[]
+  appointments    Appointment[]
+  
+  // Status
+  isActive        Boolean     @default(true)
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@index([mrn])
+  @@index([email])
+  @@index([phone])
+}
 // OTP Verification Model
 model OtpVerification {
   id          String      @id @default(cuid())
@@ -82,46 +122,54 @@ model OtpVerification {
 
 // Assessment Models
 model Assessment {
-  id              String           @id @default(cuid())
+  id                  String              @id @default(cuid())
   
-  // Registration details
-  registrantName  String
-  registrantEmail String?
-  registrantPhone String?
+  // NEW: Assessment tracking number
+  assessmentNumber    String              @unique @default(cuid())
   
-  // Form type and language
-  formType        FormType         @default(SELF)
-  language        Language         @default(ENGLISH)
+  // NEW: Link to patient (who assessment is about)
+  patientId           String
+  patient             Patient             @relation(fields: [patientId], references: [id])
   
-  // Subject details (for proxy submissions)
-  subjectName     String?
-  subjectAge      Int?
-  subjectGender   Gender?
-  relationship    String?          // relationship to registrant if proxy
+  formType            FormType            @default(SELF)
+  language            Language            @default(ENGLISH)
   
-  // Assessment data
-  responses       AssessmentResponse[]
+  // NEW: Who submitted (can be patient themselves or proxy)
+  submittedBy         String?
+  submitter           User?               @relation("SubmittedBy", fields: [submittedBy], references: [id])
   
-  // Status tracking
-  status          AssessmentStatus @default(SUBMITTED)
-  isReviewed      Boolean          @default(false)
-  reviewedBy      String?
-  reviewedAt      DateTime?
-  reviewNotes     String?
-    // Clinical review fields
-  clinicalScore   String?          // Clinical assessment score
-  recommendations String?          // Clinical recommendations
-  // Timestamps
-  submittedAt     DateTime         @default(now())
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  // NEW: Proxy details (only for PROXY submissions)
+  proxyRelationship   String?
+  proxyName           String?
+  proxyEmail          String?
+  proxyPhone          String?
   
-  // Relations
-  userId          String?
-  user            User?            @relation(fields: [userId], references: [id])
+  responses           AssessmentResponse[]
   
-  // Notifications
-  notifications   Notification[]
+  // Clinical review
+  status              AssessmentStatus    @default(SUBMITTED)
+  isReviewed          Boolean             @default(false)
+  reviewedBy          String?
+  reviewedAt          DateTime?
+  reviewNotes         String?             @db.Text
+  clinicalScore       String?
+  recommendations     String?             @db.Text
+  
+  // NEW: Priority flag
+  priority            AssessmentPriority  @default(NORMAL)
+  
+  submittedAt         DateTime            @default(now())
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  
+  appointments        Appointment[]
+  notifications       Notification[]
+  
+  // NEW: Indexes for performance
+  @@index([assessmentNumber])
+  @@index([patientId])
+  @@index([status])
+  @@index([submittedAt])
 }
 
 model AssessmentResponse {
@@ -133,6 +181,10 @@ model AssessmentResponse {
   answerType    AnswerType
   
   assessment    Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  // NEW FIELDS - ADD THESE
+  score         Float?           // Calculated score
+  scoreLabel    String?          // Human-readable interpretation
 
   createdAt     DateTime   @default(now())
 }
@@ -146,6 +198,12 @@ model QuestionGroup {
   descriptionAr String?    // Arabic translation
   order         Int
   isActive      Boolean    @default(true)
+
+  // NEW FIELDS - ADD THESE
+  hasGroupScoring Boolean       @default(false)  // Enable aggregate scoring
+  scoringType     ScoringType?                   // Group scoring type
+  scoringConfig   String?       @db.Text         // JSON for group scoring
+  interpretationRules String?   @db.Text         // Group-level interpretation
   
   // YouTube video for explanations
   videoUrl      String?
@@ -172,6 +230,16 @@ model Question {
   order           Int
   isActive        Boolean       @default(true)
   
+
+  // NEW FIELDS - ADD THESE
+  hasScoring      Boolean       @default(false)  // Enable/disable scoring
+  scoringType     ScoringType?                   // Type of scoring
+  scoringConfig   String?       @db.Text         // JSON scoring rules
+  minScore        Float?                         // Minimum score
+  maxScore        Float?                         // Maximum score
+  scoreUnit       String?                        // e.g., "points", "stage"
+  interpretationRules String?   @db.Text         // JSON interpretation ranges
+
   // Answer options (for multiple choice, etc.)
   options         String?       // JSON string for options with translations
   
@@ -179,6 +247,9 @@ model Question {
   validationRules String?       // JSON string for validation rules
   
   questionGroup   QuestionGroup @relation(fields: [questionGroupId], references: [id], onDelete: Cascade)
+
+    // NEW: Define if question is for SELF, PROXY, or BOTH
+  applicableFor   FormType[]
   
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -206,9 +277,10 @@ model Notification {
 // Phase 2 Models (Future)
 model Appointment {
   id           String           @id @default(cuid())
-  patientName  String
-  patientEmail String
-  patientPhone String?
+  // NEW: Link to patient record
+  patientId       String
+  patient         Patient             @relation(fields: [patientId], references: [id])
+  
   
   type         AppointmentType
   status       AppointmentStatus @default(SCHEDULED)
@@ -221,9 +293,52 @@ model Appointment {
   // Virtual appointment details
   meetingUrl   String?
   meetingId    String?
+
+   assessmentId String?
+  clinicianId  String? 
+  createdBy    String?
+  language     Language @default(ENGLISH)
+  
+  // Add these relations:
+  assessment   Assessment? @relation(fields: [assessmentId], references: [id])
+  reminders    AppointmentReminder[]
+
+  
   
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+}
+// Add this new model
+model AppointmentReminder {
+  id            String      @id @default(cuid())
+  appointmentId String
+  reminderType  String      
+  reminderTime  DateTime
+  sent          Boolean     @default(false)
+  sentAt        DateTime?
+  
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum AssessmentPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+
+
+enum ScoringType {
+  SIMPLE           // Direct score mapping (FAST)
+  WEIGHTED         // Conditional scoring (GDS-15)
+  RANGE            // Score ranges
+  FORMULA          // Custom formula
+  AGGREGATE        // Sum/average across questions
+  CONDITIONAL      // Depends on other answers
 }
 
 // Enums

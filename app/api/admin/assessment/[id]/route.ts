@@ -23,7 +23,8 @@ export async function GET(
       include: {
         responses: {
           orderBy: { createdAt: 'asc' }
-        }
+        },
+        patient: true,
       }
     })
 

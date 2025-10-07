@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -21,17 +21,16 @@ interface RegistrationProps {
   requirePassword?: boolean
 }
 
-export default function RegistrationComponent({ onSuccess, requirePassword = true }: RegistrationProps) {
-  // Default language is Arabic as requested
+export default function RegistrationComponent({ onSuccess, requirePassword = false }: RegistrationProps) {
   const [currentStep, setCurrentStep] = useState<'form' | 'otp' | 'success'>('form')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [otpSent, setOtpSent] = useState(false)
   const [otp, setOtp] = useState('')
   const [otpType, setOtpType] = useState<'EMAIL' | 'SMS'>('EMAIL')
-  const [language, setLanguage] = useState<'english' | 'arabic'>('arabic')
+  const [language, setLanguage] = useState<'english' | 'arabic'>('english')
   const [identifierValue, setIdentifierValue] = useState('')
-  const [formData, setFormData] = useState<RegistrationForm | undefined>()
+  const [formData, setFormData] = useState<RegistrationForm>()
 
   const {
     register,
@@ -40,23 +39,17 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
     watch,
     setValue
   } = useForm<RegistrationForm>({
-    resolver: zodResolver(registrationSchema),
-    defaultValues: { language: 'arabic' }
+    resolver: zodResolver(registrationSchema)
   })
-
-  // Keep react-hook-form language in sync with local state
-  useEffect(() => {
-    setValue('language', language)
-  }, [language, setValue])
 
   const watchedIdentifier = watch('identifier')
 
   // Auto-detect identifier type
-  useEffect(() => {
+  React.useEffect(() => {
     if (watchedIdentifier) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       const phoneRegex = /^(\+966|966|0)?[0-9]{8,9}$/
-
+      
       if (emailRegex.test(watchedIdentifier)) {
         setOtpType('EMAIL')
       } else if (phoneRegex.test(watchedIdentifier)) {
@@ -67,8 +60,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
   }, [watchedIdentifier])
 
   const handleSendOtp = async (data: RegistrationForm) => {
-    // ensure language exists on data (zod will validate), but fallback to local state
-    const langToSend = data.language ?? language
+      console.log('handleSendOtp triggered with data:', data);
     setLoading(true)
     try {
       const response = await fetch('/api/auth/send-otp', {
@@ -77,7 +69,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
         body: JSON.stringify({
           identifier: data.identifier,
           name: data.name,
-          language: langToSend,
+          language,
           type: otpType
         })
       })
@@ -121,15 +113,13 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
 
       if (verifyResponse.ok) {
         // Now register the user
-        const registerBody: any = {
-          ...formData,
-          [otpType === 'EMAIL' ? 'email' : 'phone']: identifierValue
-        }
-
         const registerResponse = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(registerBody)
+          body: JSON.stringify({
+            ...formData,
+            [otpType === 'EMAIL' ? 'email' : 'phone']: identifierValue
+          })
         })
 
         const registerResult = await registerResponse.json()
@@ -158,7 +148,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
 
   const handleResendOtp = async () => {
     if (!formData) return
-
+    
     setLoading(true)
     try {
       const response = await fetch('/api/auth/send-otp', {
@@ -207,8 +197,6 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
       </div>
     )
   }
-  console.log('RegistrationComponent: requirePassword=', requirePassword, 'language=', language)
-
 
   if (currentStep === 'otp') {
     return (
@@ -278,13 +266,13 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
       <div className="flex justify-center mb-6">
         <div className="bg-gray-100 rounded-lg p-1 flex">
           <button
-            onClick={() => setLanguage('english')}
+            onClick={() => {setLanguage('english'); setValue('language', 'english')}}
             className={`px-3 py-1 rounded-md text-sm ${language === 'english' ? 'bg-white shadow-sm' : 'text-gray-600'}`}
           >
             English
           </button>
           <button
-            onClick={() => setLanguage('arabic')}
+            onClick={() => {setLanguage('arabic'); setValue('language', 'arabic')}}
             className={`px-3 py-1 rounded-md text-sm ${language === 'arabic' ? 'bg-white shadow-sm' : 'text-gray-600'}`}
           >
             العربية
@@ -353,7 +341,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
         </div>
 
         {/* Password Field (Optional) */}
-        
+        {requirePassword && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {isArabic ? 'كلمة المرور (اختياري)' : 'Password (Optional)'}
@@ -378,9 +366,9 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
               <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
             )}
           </div>
-        
+        )}
 
-        {/* Hidden language field (kept for form validation) */}
+        {/* Hidden language field */}
         <input {...register('language')} type="hidden" />
 
         {/* Submit Button */}

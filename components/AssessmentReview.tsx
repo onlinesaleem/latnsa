@@ -18,10 +18,12 @@ import {
   MessageSquare
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { Patient } from '@prisma/client'
+import { calculateAge } from '@/app/utils/dateUtils'
 
 interface Assessment {
   id: string
-  registrantName: string
+  assessmentNumber: string
   registrantEmail?: string
   formType: 'SELF' | 'PROXY'
   language: 'ENGLISH' | 'ARABIC'
@@ -38,7 +40,9 @@ interface Assessment {
   clinicalScore?: string
   recommendations?: string
   responses: AssessmentResponse[]
+  patient: Patient
 }
+
 
 interface AssessmentResponse {
   id: string
@@ -158,20 +162,98 @@ export default function AssessmentReview({ assessmentId }: AssessmentReviewProps
     }
   }
 
-  const calculateBristolScore = () => {
-    if (!assessment) return 0
+// Updated calculateBristolScore function for the complete questionnaire
+const calculateBristolScore = () => {
+  if (!assessment || !assessment.responses) return 0
+  
+  let total = 0
+  let bristolResponses = 0
+  
+  console.log("=== Bristol Score Calculation ===")
+  console.log("Total responses:", assessment.responses.length)
+  
+  assessment.responses.forEach((response, index) => {
+    // Only calculate Bristol scores for Bristol questions
+    // Bristol questions are typically in the "Bristol Activities of Daily Living Scale" group
+    const isBristolQuestion = response.questionText && (
+      response.questionText.includes("Food preparation") ||
+      response.questionText.includes("Eating") ||
+      response.questionText.includes("Drink preparation") ||
+      response.questionText.includes("Drinking") ||
+      response.questionText.includes("Dressing") ||
+      response.questionText.includes("Personal hygiene") ||
+      response.questionText.includes("Teeth") ||
+      response.questionText.includes("Bathing") ||
+      response.questionText.includes("Toilet use") ||
+      response.questionText.includes("Transferring") ||
+      response.questionText.includes("Walking") ||
+      response.questionText.includes("Time orientation") ||
+      response.questionText.includes("Place orientation") ||
+      response.questionText.includes("Communication") ||
+      response.questionText.includes("Telephone use") ||
+      response.questionText.includes("Housework") ||
+      response.questionText.includes("Shopping") ||
+      response.questionText.includes("Managing financial") ||
+      response.questionText.includes("Games and hobbies") ||
+      response.questionText.includes("Transportation")
+    )
     
-    let total = 0
-    assessment.responses.forEach(response => {
-      // Bristol scoring: A=0, B=1, C=2, D=3, E=0
-      if (response.answerValue.startsWith('A)')) total += 0
-      else if (response.answerValue.startsWith('B)')) total += 1
-      else if (response.answerValue.startsWith('C)')) total += 2
-      else if (response.answerValue.startsWith('D)')) total += 3
-      else if (response.answerValue.startsWith('E)')) total += 0
-    })
-    return total
+    if (!isBristolQuestion) {
+      return // Skip non-Bristol questions
+    }
+    
+    bristolResponses++
+    const answerValue = response.answerValue?.toString() || ''
+    let score = 0
+    
+    console.log(`\nBristol Question ${bristolResponses}:`, response.questionText)
+    console.log(`Answer: "${answerValue}"`)
+    
+    // Handle different possible answer formats
+    if (answerValue.includes('A)') || answerValue.startsWith('A)') || answerValue.includes('أ)')) {
+      score = 0
+    } else if (answerValue.includes('B)') || answerValue.startsWith('B)') || answerValue.includes('ب)')) {
+      score = 1
+    } else if (answerValue.includes('C)') || answerValue.startsWith('C)') || answerValue.includes('ج)')) {
+      score = 2
+    } else if (answerValue.includes('D)') || answerValue.startsWith('D)') || answerValue.includes('د)')) {
+      score = 3
+    } else if (answerValue.includes('E)') || answerValue.startsWith('E)') || answerValue.includes('هـ)')) {
+      score = 0 // Not applicable
+    } else {
+      // Try alternative patterns
+      const upperAnswer = answerValue.toUpperCase()
+      if (upperAnswer.includes('CHOOSES AND PREPARES') || upperAnswer.includes('INDEPENDENTLY')) {
+        score = 0
+      } else if (upperAnswer.includes('INGREDIENTS PROVIDED') || upperAnswer.includes('IF ASSISTED')) {
+        score = 1
+      } else if (upperAnswer.includes('STEP BY STEP') || upperAnswer.includes('SUPERVISION')) {
+        score = 2
+      } else if (upperAnswer.includes('CANNOT') || upperAnswer.includes('NEEDS FULL')) {
+        score = 3
+      } else if (upperAnswer.includes('NOT APPLICABLE')) {
+        score = 0
+      }
+      
+      console.log(`Alternative matching used for: "${answerValue}"`)
+    }
+    
+    console.log(`Score: ${score}`)
+    total += score
+  })
+  
+  console.log(`\n=== Bristol Score Summary ===`)
+  console.log(`Bristol questions found: ${bristolResponses}`)
+  console.log(`Total Bristol Score: ${total}`)
+  console.log(`Expected Bristol questions: 20`)
+  
+  if (bristolResponses < 20) {
+    console.warn(`Warning: Only ${bristolResponses} Bristol questions found, expected 20`)
   }
+  
+  return total
+}
+
 
   const renderResponseValue = (response: AssessmentResponse) => {
     if (response.answerType === 'MULTIPLE_CHOICE') {
@@ -233,7 +315,7 @@ export default function AssessmentReview({ assessmentId }: AssessmentReviewProps
                 <h1 className="text-2xl font-bold text-gray-900">
                   Assessment Review
                 </h1>
-                <p className="text-gray-600">ID: {assessment.id}</p>
+                <p className="text-gray-600">Assessment #: {assessment.assessmentNumber}</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -280,16 +362,30 @@ export default function AssessmentReview({ assessmentId }: AssessmentReviewProps
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Subject</label>
+                  <label className="text-sm font-medium text-gray-500">Patient MRN</label>
                   <p className="text-gray-900">
-                    {assessment.formType === 'PROXY' ? assessment.subjectName : assessment.registrantName}
+                    {assessment.formType === 'PROXY' ?  assessment.patient.mrn : assessment.patient.mrn}
                   </p>
                 </div>
+                      {assessment.patient.fullName && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Patient Name</label>
+                    <p className="text-gray-900">{assessment.patient.fullName}</p>
+                  </div>
+                )}
+                     {assessment.patient.phone && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Mobile</label>
+                    <p className="text-gray-900">{assessment.patient.phone}</p>
+                  </div>
+                )}
 
-                {assessment.subjectAge && (
+
+                {assessment.patient.dateOfBirth && (
                   <div>
                     <label className="text-sm font-medium text-gray-500">Age</label>
-                    <p className="text-gray-900">{assessment.subjectAge}</p>
+                    <p className="text-gray-900">{calculateAge(assessment.patient.dateOfBirth)}</p>
+                      
                   </div>
                 )}
 

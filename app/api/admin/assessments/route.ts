@@ -1,3 +1,4 @@
+// app/api/admin/assessments/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
@@ -7,58 +8,61 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    // Check admin access
-    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'CLINICAL_STAFF')) {
+    // Check authorization
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'Access denied' },
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'CLINICAL_STAFF') {
+      return NextResponse.json(
+        { error: 'Access denied. Admin or clinical staff privileges required.' },
         { status: 403 }
       )
     }
 
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const status = searchParams.get('status')
-    const formType = searchParams.get('formType')
-
-    // Build where clause
-    const where: any = {}
-    if (status && status !== 'all') {
-      where.status = status
-    }
-    if (formType && formType !== 'all') {
-      where.formType = formType
-    }
-
+    // Fetch all assessments with patient and submitter information
     const assessments = await prisma.assessment.findMany({
-      where,
       include: {
+        patient: {
+          select: {
+            id: true,
+            mrn: true,
+            fullName: true,
+            email: true,
+            phone: true,
+            gender: true,
+            dateOfBirth: true
+          }
+        },
+        submitter: {
+          select: {
+            name: true,
+            email: true
+          }
+        },
         _count: {
-          select: { responses: true }
+          select: {
+            responses: true
+          }
         }
       },
-      orderBy: { submittedAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit
-    })
-
-    const total = await prisma.assessment.count({ where })
-
-    return NextResponse.json({
-      success: true,
-      assessments,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
+      orderBy: {
+        submittedAt: 'desc'
       }
     })
 
+    return NextResponse.json({
+      success: true,
+      assessments
+    })
+
   } catch (error) {
-    console.error('Get assessments API error:', error)
+    console.error('Error fetching assessments:', error)
     return NextResponse.json(
-      { error: 'Failed to load assessments' },
+      { error: 'Failed to fetch assessments' },
       { status: 500 }
     )
   }

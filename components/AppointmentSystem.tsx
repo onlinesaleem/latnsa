@@ -32,19 +32,29 @@ const appointmentSchema = z.object({
   preferredDate: z.string().min(1, 'Preferred date is required'),
   preferredTime: z.string().min(1, 'Preferred time is required'),
   notes: z.string().optional(),
-  duration: z.number().min(15).max(120).default(30)
+  duration: z.number().min(15).max(120)
 })
 
 type AppointmentForm = z.infer<typeof appointmentSchema>
+type AppointmentType = 'LAB_TESTING' | 'VIRTUAL_CONSULTATION' | 'VIDEO_CALL';
+
+type AppointmentStatus =
+  | 'SCHEDULED'
+  | 'CONFIRMED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'NO_SHOW';
+
 
 interface Appointment {
   id: string
   patientName: string
   patientEmail: string
-  patientPhone?: string
+  patientPhone: string 
   type: 'LAB_TESTING' | 'VIRTUAL_CONSULTATION' | 'VIDEO_CALL'
   status: 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW'
-  scheduledAt: string
+  scheduledAt: Date
   duration: number
   notes?: string
   meetingUrl?: string
@@ -77,9 +87,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
     setValue
   } = useForm<AppointmentForm>({
     resolver: zodResolver(appointmentSchema),
-    defaultValues: {
-      duration: 30
-    }
+    defaultValues: { duration: 30 }
   })
 
   // Load appointments
@@ -182,7 +190,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
   }
 
   // Get appointment type label
-  const getAppointmentTypeLabel = (type: string) => {
+  const getAppointmentTypeLabel = (type: AppointmentType) => {
     const types = {
       LAB_TESTING: { en: 'Lab Testing', ar: 'فحص مخبري' },
       VIRTUAL_CONSULTATION: { en: 'Virtual Consultation', ar: 'استشارة افتراضية' },
@@ -192,7 +200,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
   }
 
   // Get status badge color
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: AppointmentStatus) => {
     const colors = {
       SCHEDULED: 'bg-blue-100 text-blue-800',
       CONFIRMED: 'bg-green-100 text-green-800',
@@ -426,7 +434,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
                     onClick={() => setShowNewAppointment(false)}
                     className="text-gray-400 hover:text-gray-600"
                   >
-                    <X className="w-6 h-6" />
+                    <div className="w-6 h-6" />
                   </button>
                 </div>
 

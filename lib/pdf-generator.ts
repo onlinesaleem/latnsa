@@ -1,16 +1,15 @@
 // lib/pdf-generator.ts - PDF Report Generation
+import { Patient } from '@prisma/client'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
 interface AssessmentData {
   id: string
-  registrantName: string
-  registrantEmail?: string | null
+ assessmentNumber: string
   formType: 'SELF' | 'PROXY'
   language: 'ENGLISH' | 'ARABIC'
-  subjectName?: string | null
-  subjectAge?: number | null
-  subjectGender?: string | null
+  
+  
   relationship?: string | null
   submittedAt: Date 
   reviewNotes?: string | null
@@ -19,6 +18,7 @@ interface AssessmentData {
   reviewedBy?: string | null
   reviewedAt?: Date | null
   responses: AssessmentResponse[]
+  patient: Patient
 }
 
 interface AssessmentResponse {
@@ -115,8 +115,8 @@ export class PDFReportGenerator {
     this.doc.text(`${dateLabel} ${new Date().toLocaleDateString()}`, pageWidth - 15, 20, { align: 'right' })
     
     // Assessment ID
-    const idLabel = this.isArabic ? 'رقم التقييم:' : 'Assessment ID:'
-    this.doc.text(`${idLabel} ${assessment.id}`, pageWidth - 15, 30, { align: 'right' })
+    const idLabel = this.isArabic ? 'رقم التقييم:' : 'Assessment#:'
+    this.doc.text(`${idLabel} ${assessment.assessmentNumber}`, pageWidth - 15, 30, { align: 'right' })
     
     // Line separator
     this.doc.setLineWidth(0.5)
@@ -140,33 +140,41 @@ export class PDFReportGenerator {
     
     if (assessment.formType === 'PROXY') {
       patientData.push([
+        this.isArabic ? 'اسم المريض' : 'MRN',
+        assessment.patient.mrn 
+      ])
+        patientData.push([
         this.isArabic ? 'اسم المريض' : 'Patient Name',
-        assessment.subjectName || 'N/A'
+        assessment.patient.fullName || 'N/A'
       ])
       patientData.push([
         this.isArabic ? 'العمر' : 'Age', 
-        assessment.subjectAge?.toString() || 'N/A'
+        assessment.patient.dateOfBirth?.toString() || 'N/A'
       ])
       patientData.push([
         this.isArabic ? 'الجنس' : 'Gender',
-        assessment.subjectGender || 'N/A'
+        assessment.patient.gender 
       ])
-      patientData.push([
-        this.isArabic ? 'معبأ بواسطة' : 'Completed by',
-        assessment.registrantName
-      ])
+      // patientData.push([
+      //   this.isArabic ? 'معبأ بواسطة' : 'Completed by',
+      //   assessment.registrantName
+      // ])
       patientData.push([
         this.isArabic ? 'العلاقة' : 'Relationship',
         assessment.relationship || 'N/A'
       ])
     } else {
+        patientData.push([
+        this.isArabic ? 'اسم المريض' : 'MRN',
+        assessment.patient.mrn 
+      ])
       patientData.push([
         this.isArabic ? 'اسم المريض' : 'Patient Name',
-        assessment.registrantName
+        assessment.patient?.fullName 
       ])
       patientData.push([
         this.isArabic ? 'البريد الإلكتروني' : 'Email',
-        assessment.registrantEmail || 'N/A'
+        assessment.patient.email || 'N/A'
       ])
     }
     

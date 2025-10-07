@@ -17,10 +17,7 @@ import {
   Info,
   Mail,
   FileText,
-  Shield,
-  Calendar,
-  CalendarPlus,
-  Clock
+  Shield
 } from 'lucide-react'
 
 interface NavigationProps {
@@ -31,35 +28,10 @@ interface NavigationProps {
 export default function MainNavigation({ language = 'english', onLanguageChange }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [appointmentCount, setAppointmentCount] = useState(0)
   const { data: session, status } = useSession()
   const router = useRouter()
   const pathname = usePathname()
   const isArabic = language === 'arabic'
-
-  // Load user's appointment count for badge
-  useEffect(() => {
-    if (status === 'authenticated') {
-      loadAppointmentCount()
-    }
-  }, [status])
-
-  const loadAppointmentCount = async () => {
-    try {
-      const response = await fetch('/api/appointments')
-      const data = await response.json()
-      if (response.ok) {
-        const upcomingCount = data.appointments?.filter((apt: any) => 
-          new Date(apt.scheduledAt) > new Date() && 
-          apt.status !== 'COMPLETED' && 
-          apt.status !== 'CANCELLED'
-        ).length || 0
-        setAppointmentCount(upcomingCount)
-      }
-    } catch (error) {
-      console.error('Error loading appointment count:', error)
-    }
-  }
 
   const navLinks = [
     {
@@ -69,26 +41,11 @@ export default function MainNavigation({ language = 'english', onLanguageChange 
       icon: Home
     },
     {
-      labelEn: 'Book Appointment',
-      labelAr: 'حجز موعد',
-      href: '/appointments/book',
-      icon: CalendarPlus,
-      public: true // Available to everyone
-    },
-    {
       labelEn: 'Assessment',
       labelAr: 'التقييم',
       href: '/assessment',
       icon: FileText,
       requiresAuth: true
-    },
-    {
-      labelEn: 'My Appointments',
-      labelAr: 'مواعيدي',
-      href: '/appointments',
-      icon: Calendar,
-      requiresAuth: true,
-      badge: appointmentCount
     },
     {
       labelEn: 'About',
@@ -155,32 +112,13 @@ export default function MainNavigation({ language = 'english', onLanguageChange 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => {
-              // Show public links to everyone
-              if (link.public) {
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      isActivePath(link.href)
-                        ? 'text-blue-600 bg-blue-50'
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <link.icon className="w-4 h-4" />
-                    <span>{isArabic ? link.labelAr : link.labelEn}</span>
-                  </Link>
-                )
-              }
-              
-              // Show auth-required links only to authenticated users
               if (link.requiresAuth && status !== 'authenticated') return null
               
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     isActivePath(link.href)
                       ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
@@ -188,11 +126,6 @@ export default function MainNavigation({ language = 'english', onLanguageChange 
                 >
                   <link.icon className="w-4 h-4" />
                   <span>{isArabic ? link.labelAr : link.labelEn}</span>
-                  {link.badge && link.badge > 0 && (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                      {link.badge}
-                    </span>
-                  )}
                 </Link>
               )
             })}
@@ -232,37 +165,11 @@ export default function MainNavigation({ language = 'english', onLanguageChange 
 
                 {/* User Dropdown */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
                     <div className="px-3 py-2 border-b border-gray-100">
                       <div className="text-sm font-medium text-gray-900">{session.user.name}</div>
                       <div className="text-xs text-gray-500">{session.user.email}</div>
                       <div className="text-xs text-blue-600 capitalize">{session.user.role?.toLowerCase()}</div>
-                    </div>
-                    
-                    {/* Quick Appointment Actions */}
-                    <div className="border-b border-gray-100 py-1">
-                      <Link
-                        href="/appointments"
-                        className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>{isArabic ? 'مواعيدي' : 'My Appointments'}</span>
-                        </div>
-                        {appointmentCount > 0 && (
-                          <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
-                            {appointmentCount}
-                          </span>
-                        )}
-                      </Link>
-                      
-                      <Link
-                        href="/appointments/book"
-                        className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <CalendarPlus className="w-4 h-4" />
-                        <span>{isArabic ? 'حجز موعد جديد' : 'Book New Appointment'}</span>
-                      </Link>
                     </div>
                     
                     <Link
@@ -328,28 +235,6 @@ export default function MainNavigation({ language = 'english', onLanguageChange 
           <div className="md:hidden py-4 border-t border-gray-100">
             <div className="space-y-2">
               {navLinks.map((link) => {
-                // Show public links to everyone
-                if (link.public) {
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        isActivePath(link.href)
-                          ? 'text-blue-600 bg-blue-50'
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <link.icon className="w-4 h-4" />
-                        <span>{isArabic ? link.labelAr : link.labelEn}</span>
-                      </div>
-                    </Link>
-                  )
-                }
-                
-                // Show auth-required links only to authenticated users
                 if (link.requiresAuth && status !== 'authenticated') return null
                 
                 return (
@@ -357,21 +242,14 @@ export default function MainNavigation({ language = 'english', onLanguageChange 
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsOpen(false)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       isActivePath(link.href)
                         ? 'text-blue-600 bg-blue-50'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <link.icon className="w-4 h-4" />
-                      <span>{isArabic ? link.labelAr : link.labelEn}</span>
-                    </div>
-                    {link.badge && link.badge > 0 && (
-                      <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                        {link.badge}
-                      </span>
-                    )}
+                    <link.icon className="w-4 h-4" />
+                    <span>{isArabic ? link.labelAr : link.labelEn}</span>
                   </Link>
                 )
               })}
