@@ -39,7 +39,6 @@ async function generateAssessmentNumber(): Promise<string> {
 }
 
 // Helper function to determine answer type
-// Helper function to determine answer type
 function determineAnswerType(value: any, questionType?: string): AnswerType {
   if (Array.isArray(value)) return AnswerType.MULTIPLE_CHOICE
   if (typeof value === 'boolean') return AnswerType.BOOLEAN
@@ -47,6 +46,78 @@ function determineAnswerType(value: any, questionType?: string): AnswerType {
   if (questionType === 'DATE') return AnswerType.DATE
   if (questionType === 'SCALE') return AnswerType.SCALE
   return AnswerType.TEXT
+}
+
+// NEW: Calculate score based on question's scoring config
+function calculateScore(
+  answerValue: any,
+  question: any
+): { score: number | null; scoreLabel: string | null } {
+  
+  if (!question.hasScoring || !question.scoringConfig) {
+    return { score: null, scoreLabel: null }
+  }
+
+  try {
+    const config = JSON.parse(question.scoringConfig)
+    let score: number | null = null
+    
+    // Convert answer to string for comparison
+    const answerStr = typeof answerValue === 'object' 
+      ? JSON.stringify(answerValue) 
+      : String(answerValue)
+
+    switch (config.type) {
+      case 'answer_match':
+        // GDS-15 style: specific answer gets specific score
+        score = config.scores[answerStr] !== undefined 
+          ? Number(config.scores[answerStr]) 
+          : 0
+        break
+        
+      case 'option_index':
+        // FAST style: option index maps to score
+        const index = parseInt(answerStr)
+        score = config.scores[index] !== undefined 
+          ? Number(config.scores[index]) 
+          : index + 1
+        break
+        
+      case 'direct':
+        // Direct score from answer value
+        score = Number(answerStr) || 0
+        break
+        
+      default:
+        score = 0
+    }
+
+    // Get interpretation if available
+    let scoreLabel: string | null = null
+    if (question.interpretationRules) {
+      try {
+        const interpretation = JSON.parse(question.interpretationRules)
+        if (interpretation.ranges && Array.isArray(interpretation.ranges)) {
+          const range = interpretation.ranges.find(
+            (r: any) => score !== null && score >= r.min && score <= r.max
+          )
+          if (range) {
+            scoreLabel = range.label
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing interpretation rules:', e)
+      }
+    }
+
+    console.log(`Score calculated: Question ${question.id}, Answer: "${answerStr}", Score: ${score}, Label: ${scoreLabel}`)
+    
+    return { score, scoreLabel }
+    
+  } catch (error) {
+    console.error('Error calculating score:', error)
+    return { score: null, scoreLabel: null }
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -62,12 +133,10 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     
-    console.log('Submit assessment request:', {
-      patientId: body.patientId,
-      formType: body.formType,
-      hasProxyInfo: !!body.proxyInfo,
-      responseCount: Object.keys(body.responses || {}).length
-    })
+    console.log('=== Submit Assessment ===')
+    console.log('Patient ID:', body.patientId)
+    console.log('Form Type:', body.formType)
+    console.log('Response Count:', Object.keys(body.responses || {}).length)
 
     const validatedData = submitAssessmentSchema.parse(body)
 
@@ -120,44 +189,83 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // Create assessment responses
+      console.log('Assessment created:', newAssessment.assessmentNumber)
+
+      // Create assessment responses WITH SCORING
       if (validatedData.responses && Object.keys(validatedData.responses).length > 0) {
         const questionIds = Object.keys(validatedData.responses)
+        
+        // Fetch questions with scoring configuration
         const questions = await tx.question.findMany({
-          where: { id: { in: questionIds } }
+          where: { id: { in: questionIds } },
+          select: {
+            id: true,
+            text: true,
+            textAr: true,
+            type: true,
+            hasScoring: true,
+            scoringConfig: true,
+            minScore: true,
+            maxScore: true,
+            scoreUnit: true,
+            interpretationRules: true
+          }
         })
 
-        const questionMap = new Map(
-          questions.map(q => [q.id, { text: q.text, textAr: q.textAr, type: q.type }])
-        )
+        const questionMap = new Map(questions.map(q => [q.id, q]))
+        
+        console.log(`Processing ${questionIds.length} responses...`)
+        console.log(`Questions with scoring enabled: ${questions.filter(q => q.hasScoring).length}`)
 
         const responseRecords = Object.entries(validatedData.responses)
           .filter(([_, value]) => value !== undefined && value !== null && value !== '')
           .map(([questionId, answerValue]) => {
             const question = questionMap.get(questionId)
             
+            if (!question) {
+              console.warn(`Question not found: ${questionId}`)
+              return null
+            }
+
+            // Calculate score for this response
+            const { score, scoreLabel } = calculateScore(answerValue, question)
+            
             return {
               assessmentId: newAssessment.id,
               questionId,
-              questionText: question?.text || 'Question not found',
+              questionText: question.text || 'Question not found',
               answerValue: typeof answerValue === 'object' 
                 ? JSON.stringify(answerValue) 
                 : String(answerValue),
-              answerType: determineAnswerType(answerValue, question?.type)
+              answerType: determineAnswerType(answerValue, question.type),
+              score,        // ← SAVE THE CALCULATED SCORE
+              scoreLabel    // ← SAVE THE INTERPRETATION
             }
           })
+          .filter(record => record !== null)
 
         if (responseRecords.length > 0) {
           await tx.assessmentResponse.createMany({
             data: responseRecords
           })
+          
+          const scoredResponses = responseRecords.filter(r => r.score !== null)
+          console.log(`Created ${responseRecords.length} responses (${scoredResponses.length} with scores)`)
+          
+          // Log sample scores
+          if (scoredResponses.length > 0) {
+            console.log('Sample scores:', scoredResponses.slice(0, 3).map(r => ({
+              question: r.questionText.substring(0, 40),
+              answer: r.answerValue.substring(0, 20),
+              score: r.score
+            })))
+          }
         }
       }
 
       // Create notification records
       const notifications = []
 
-      // Notification for admin
       if (process.env.ADMIN_EMAIL) {
         notifications.push({
           assessmentId: newAssessment.id,
@@ -168,7 +276,6 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      // Notification for clinical team
       if (process.env.CLINICAL_EMAIL) {
         notifications.push({
           assessmentId: newAssessment.id,
@@ -188,10 +295,12 @@ export async function POST(request: NextRequest) {
       return newAssessment
     })
 
+    console.log('=== Assessment Submitted Successfully ===')
+    console.log('Assessment Number:', assessment.assessmentNumber)
+
     // Send notification emails (outside transaction, non-blocking)
     const emailPromises = []
 
-    // 1. Confirmation email to patient/submitter
     const recipientEmail = validatedData.formType === 'SELF' 
       ? patient.email 
       : validatedData.proxyInfo?.proxyEmail
@@ -215,7 +324,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 2. Notification to admin
     if (process.env.ADMIN_EMAIL) {
       const clientTemplate = emailTemplates.assessmentNotificationClient({
         registrantName: validatedData.formType === 'SELF' 
@@ -236,7 +344,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 3. Notification to clinical team
     if (process.env.CLINICAL_EMAIL) {
       const clinicalTemplate = emailTemplates.assessmentNotificationClinical({
         registrantName: validatedData.formType === 'SELF' 
@@ -258,7 +365,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send all emails (non-blocking)
     if (emailPromises.length > 0) {
       Promise.all(emailPromises)
         .then(() => console.log('All notification emails sent successfully'))
