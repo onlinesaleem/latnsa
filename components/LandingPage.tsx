@@ -26,7 +26,11 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
   const [language, setLanguage] = useState<'english' | 'arabic'>(initialLanguage)
   const router = useRouter()
   const isArabic = language === 'arabic'
-
+ // language toggle handler
+  const toggleLanguage = () => {
+    setLanguage(prev => (prev === 'english' ? 'arabic' : 'english'))
+    // Note: RTL/LTR handled by root div class in returned JSX
+  }
   const features = [
     {
       icon: Brain,
@@ -81,6 +85,7 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
 
   return (
     <div className={`min-h-screen bg-white ${isArabic ? 'rtl' : 'ltr'}`}>
+    
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 overflow-hidden">
         <div className="absolute inset-0">
