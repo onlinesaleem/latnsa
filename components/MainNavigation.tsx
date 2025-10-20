@@ -1,440 +1,105 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter, usePathname } from 'next/navigation'
-import { useSession, signOut } from 'next-auth/react'
-import { 
-  Brain, 
-  Menu, 
-  X, 
-  Globe, 
-  User, 
-  LogOut, 
-  Settings,
-  ChevronDown,
-  Home,
-  Info,
-  Mail,
-  FileText,
-  Shield,
-  Calendar,
-  CalendarPlus,
-  Clock
-} from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Globe, Home, CalendarDays, Info, Mail } from 'lucide-react'
+import { Button } from './ui/button'
 
-interface NavigationProps {
-  language?: 'english' | 'arabic'
-  onLanguageChange?: (lang: 'english' | 'arabic') => void
+
+interface MainNavigationProps {
+  language: 'english' | 'arabic'
+  onLanguageChange: (lang: 'english' | 'arabic') => void
 }
 
-export default function MainNavigation({ language = 'english', onLanguageChange }: NavigationProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [appointmentCount, setAppointmentCount] = useState(0)
-  const { data: session, status } = useSession()
-  const router = useRouter()
+export default function MainNavigation({ language, onLanguageChange }: MainNavigationProps) {
   const pathname = usePathname()
-  const isArabic = language === 'arabic'
+  const isActive = (path: string) => pathname === path
 
-  // Load user's appointment count for badge
-  useEffect(() => {
-    if (status === 'authenticated') {
-      loadAppointmentCount()
-    }
-  }, [status])
-
-  const loadAppointmentCount = async () => {
-    try {
-      const response = await fetch('/api/appointments')
-      const data = await response.json()
-      if (response.ok) {
-        const upcomingCount = data.appointments?.filter((apt: any) => 
-          new Date(apt.scheduledAt) > new Date() && 
-          apt.status !== 'COMPLETED' && 
-          apt.status !== 'CANCELLED'
-        ).length || 0
-        setAppointmentCount(upcomingCount)
-      }
-    } catch (error) {
-      console.error('Error loading appointment count:', error)
-    }
-  }
-
-  const navLinks = [
-    {
-      labelEn: 'Home',
-      labelAr: 'الرئيسية',
-      href: '/',
-      icon: Home
-    },
-    {
-      labelEn: 'Book Appointment',
-      labelAr: 'حجز موعد',
-      href: '/appointments/book',
-      icon: CalendarPlus,
-      public: true // Available to everyone
-    },
-    {
-      labelEn: 'Assessment',
-      labelAr: 'التقييم',
-      href: '/assessment',
-      icon: FileText,
-      requiresAuth: true
-    },
-    {
-      labelEn: 'My Appointments',
-      labelAr: 'مواعيدي',
-      href: '/appointments',
-      icon: Calendar,
-      requiresAuth: true,
-      badge: appointmentCount
-    },
-    {
-      labelEn: 'About',
-      labelAr: 'حول',
-      href: '/about',
-      icon: Info
-    },
-    {
-      labelEn: 'Contact',
-      labelAr: 'اتصل بنا',
-      href: '/contact',
-      icon: Mail
-    }
+  const navItems = [
+    { href: '/', labelEn: 'Home', labelAr: 'الرئيسية', icon: <Home className="w-4 h-4" /> },
+    { href: '/appointments', labelEn: 'Book Appointment', labelAr: 'حجز موعد', icon: <CalendarDays className="w-4 h-4" /> },
+    { href: '/about', labelEn: 'About', labelAr: 'حول', icon: <Info className="w-4 h-4" /> },
+    { href: '/contact', labelEn: 'Contact', labelAr: 'اتصل بنا', icon: <Mail className="w-4 h-4" /> },
   ]
 
-  const handleLanguageToggle = () => {
-    const newLang = language === 'english' ? 'arabic' : 'english'
-    onLanguageChange?.(newLang)
-  }
-
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/' })
-  }
-
-  const isActivePath = (href: string) => {
-    if (href === '/') {
-      return pathname === '/'
-    }
-    return pathname.startsWith(href)
-  }
-
-  // Close mobile menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setIsOpen(false)
-      setIsUserMenuOpen(false)
-    }
-
-    if (isOpen || isUserMenuOpen) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [isOpen, isUserMenuOpen])
-
   return (
-    <nav className={`bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50 ${isArabic ? 'rtl' : 'ltr'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <Brain className="w-6 h-6 text-white" />
-            </div>
-            <div className="hidden md:block">
-              <div className="text-xl font-bold text-gray-900">
-                {isArabic ? 'لاتنسا الصحية' : 'Latnsa Health'}
-              </div>
-              <div className="text-xs text-gray-500">
-                {isArabic ? 'نظام التقييم الصحي' : 'Health Assessment System'}
-              </div>
-            </div>
+    <header className="fixed top-0 left-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-200 z-50">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+        
+        {/* 🌿 Logo + Title */}
+        <Link href="/" className="flex items-center space-x-2">
+          <div className="relative w-8 h-8">
+            <Image
+              src="/logo.jpeg"
+              alt="Latnsa Logo"
+              fill
+              className="object-contain rounded-md"
+              priority
+            />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-gray-900">
+              Latnsa Health
+            </h1>
+            <p className="text-xs text-gray-500 -mt-1">
+              {language === 'arabic' ? 'نظام التقييم الصحي' : 'Health Assessment System'}
+            </p>
+          </div>
+        </Link>
+
+        {/* 🌐 Navigation Links */}
+        <nav className="hidden md:flex items-center space-x-6">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-1 text-sm font-medium transition-colors ${
+                isActive(item.href)
+                  ? 'text-[#E76A6A]'
+                  : 'text-gray-700 hover:text-[#E76A6A]'
+              }`}
+            >
+              {item.icon}
+              {language === 'arabic' ? item.labelAr : item.labelEn}
+            </Link>
+          ))}
+        </nav>
+
+        {/* 🌍 Actions */}
+        <div className="flex items-center space-x-4">
+          {/* Language Toggle */}
+          <button
+            onClick={() => onLanguageChange(language === 'arabic' ? 'english' : 'arabic')}
+            className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition"
+          >
+            <Globe className="w-4 h-4" />
+            <span className="text-sm font-medium">
+              {language === 'arabic' ? 'EN' : 'عربي'}
+            </span>
+          </button>
+
+          {/* Sign In */}
+          <Link
+            href="/auth/signin"
+            className="text-sm font-medium text-gray-700 hover:text-[#E76A6A] transition"
+          >
+            {language === 'arabic' ? 'تسجيل الدخول' : 'Sign In'}
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => {
-              // Show public links to everyone
-              if (link.public) {
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      isActivePath(link.href)
-                        ? 'text-blue-600 bg-blue-50'
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <link.icon className="w-4 h-4" />
-                    <span>{isArabic ? link.labelAr : link.labelEn}</span>
-                  </Link>
-                )
-              }
-              
-              // Show auth-required links only to authenticated users
-              if (link.requiresAuth && status !== 'authenticated') return null
-              
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${
-                    isActivePath(link.href)
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
-                >
-                  <link.icon className="w-4 h-4" />
-                  <span>{isArabic ? link.labelAr : link.labelEn}</span>
-                  {link.badge && link.badge > 0 && (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                      {link.badge}
-                    </span>
-                  )}
-                </Link>
-              )
-            })}
-          </div>
-
-          {/* Right side - Language & Auth */}
-          <div className="flex items-center space-x-4">
-            {/* Language Toggle */}
-            <button
-              onClick={handleLanguageToggle}
-              className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+          {/* Start Assessment */}
+          <Link href="/assessment">
+            <Button
+              className="bg-gradient-to-r from-[#E76A6A] to-[#85C3E0] text-white font-semibold rounded-full px-4 py-2 shadow-md hover:opacity-90 transition"
             >
-              <Globe className="w-4 h-4" />
-              <span className="text-sm font-medium">
-                {language === 'english' ? 'عربي' : 'English'}
-              </span>
-            </button>
-
-            {/* User Menu */}
-            {status === 'authenticated' ? (
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setIsUserMenuOpen(!isUserMenuOpen)
-                  }}
-                  className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
-                >
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <span className="hidden md:block text-sm font-medium">
-                    {session.user.name?.split(' ')[0] || 'User'}
-                  </span>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-
-                {/* User Dropdown */}
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-                    <div className="px-3 py-2 border-b border-gray-100">
-                      <div className="text-sm font-medium text-gray-900">{session.user.name}</div>
-                      <div className="text-xs text-gray-500">{session.user.email}</div>
-                      <div className="text-xs text-blue-600 capitalize">{session.user.role?.toLowerCase()}</div>
-                    </div>
-                    
-                    {/* Quick Appointment Actions */}
-                    <div className="border-b border-gray-100 py-1">
-                      <Link
-                        href="/appointments"
-                        className="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>{isArabic ? 'مواعيدي' : 'My Appointments'}</span>
-                        </div>
-                        {appointmentCount > 0 && (
-                          <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
-                            {appointmentCount}
-                          </span>
-                        )}
-                      </Link>
-                      
-                      <Link
-                        href="/appointments/book"
-                        className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <CalendarPlus className="w-4 h-4" />
-                        <span>{isArabic ? 'حجز موعد جديد' : 'Book New Appointment'}</span>
-                      </Link>
-                    </div>
-                    
-                    <Link
-                      href="/profile"
-                      className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                    >
-                      <Settings className="w-4 h-4" />
-                      <span>{isArabic ? 'الملف الشخصي' : 'Profile Settings'}</span>
-                    </Link>
-                    
-                    {(session.user.role === 'ADMIN' || session.user.role === 'CLINICAL_STAFF') && (
-                      <Link
-                        href="/admin"
-                        className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <Shield className="w-4 h-4" />
-                        <span>{isArabic ? 'لوحة الإدارة' : 'Admin Panel'}</span>
-                      </Link>
-                    )}
-                    
-                    <button
-                      onClick={handleSignOut}
-                      className="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>{isArabic ? 'تسجيل الخروج' : 'Sign Out'}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center space-x-3">
-                <Link
-                  href="/auth/signin"
-                  className="text-sm font-medium text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
-                >
-                  {isArabic ? 'تسجيل الدخول' : 'Sign In'}
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm hover:shadow-md"
-                >
-                  {isArabic ? 'ابدأ التقييم' : 'Start Assessment'}
-                </Link>
-              </div>
-            )}
-
-            {/* Mobile menu button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setIsOpen(!isOpen)
-              }}
-              className="md:hidden p-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-            >
-              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
+              {language === 'arabic' ? 'ابدأ التقييم' : 'Start Assessment'}
+            </Button>
+          </Link>
         </div>
-
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100">
-            <div className="space-y-2">
-              {navLinks.map((link) => {
-                // Show public links to everyone
-                if (link.public) {
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        isActivePath(link.href)
-                          ? 'text-blue-600 bg-blue-50'
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <link.icon className="w-4 h-4" />
-                        <span>{isArabic ? link.labelAr : link.labelEn}</span>
-                      </div>
-                    </Link>
-                  )
-                }
-                
-                // Show auth-required links only to authenticated users
-                if (link.requiresAuth && status !== 'authenticated') return null
-                
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      isActivePath(link.href)
-                        ? 'text-blue-600 bg-blue-50'
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <link.icon className="w-4 h-4" />
-                      <span>{isArabic ? link.labelAr : link.labelEn}</span>
-                    </div>
-                    {link.badge && link.badge > 0 && (
-                      <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                        {link.badge}
-                      </span>
-                    )}
-                  </Link>
-                )
-              })}
-
-              {status !== 'authenticated' && (
-                <div className="pt-4 mt-4 border-t border-gray-100 space-y-2">
-                  <Link
-                    href="/auth/signin"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg"
-                  >
-                    {isArabic ? 'تسجيل الدخول' : 'Sign In'}
-                  </Link>
-                  <Link
-                    href="/auth/register"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-center"
-                  >
-                    {isArabic ? 'ابدأ التقييم' : 'Start Assessment'}
-                  </Link>
-                </div>
-              )}
-
-              {status === 'authenticated' && (
-                <div className="pt-4 mt-4 border-t border-gray-100 space-y-2">
-                  <div className="px-3 py-2">
-                    <div className="text-sm font-medium text-gray-900">{session?.user.name}</div>
-                    <div className="text-xs text-gray-500">{session?.user.email}</div>
-                  </div>
-                  
-                  <Link
-                    href="/profile"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span>{isArabic ? 'الملف الشخصي' : 'Profile Settings'}</span>
-                  </Link>
-                  
-                  {(session?.user.role === 'ADMIN' || session?.user.role === 'CLINICAL_STAFF') && (
-                    <Link
-                      href="/admin"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
-                    >
-                      <Shield className="w-4 h-4" />
-                      <span>{isArabic ? 'لوحة الإدارة' : 'Admin Panel'}</span>
-                    </Link>
-                  )}
-                  
-                  <button
-                    onClick={handleSignOut}
-                    className="flex items-center space-x-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg w-full text-left"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>{isArabic ? 'تسجيل الخروج' : 'Sign Out'}</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
-    </nav>
+
+      {/* Mobile Navigation (optional future section) */}
+    </header>
   )
 }

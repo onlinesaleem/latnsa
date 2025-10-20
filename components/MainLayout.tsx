@@ -54,7 +54,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }, [language])
 
   // Don't show navigation on certain pages
-  const hideNavigation = ['/auth/signin', '/auth/register'].includes(pathname)
+const hideNavigation = ['/auth/signin', '/auth/register'].includes(pathname)
+  //const hideNavigation = ['/', '/auth/signin', '/auth/register'].includes(pathname)
 
   return (
     <div className="min-h-screen bg-gray-50">

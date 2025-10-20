@@ -1,18 +1,17 @@
-// components/AboutPage.tsx
 'use client'
 
 import React from 'react'
-import { 
-  Brain, 
-  Users, 
-  Award, 
-  Heart, 
-  Shield, 
+import {
+  Brain,
+  Users,
+  Award,
+  Heart,
+  Shield,
   Clock,
   CheckCircle,
   Star,
   Target,
-  Lightbulb
+  Lightbulb,
 } from 'lucide-react'
 
 interface AboutPageProps {
@@ -26,7 +25,7 @@ export default function AboutPage({ language = 'english' }: AboutPageProps) {
     { numberEn: '10,000+', numberAr: '10,000+', labelEn: 'Assessments Completed', labelAr: 'تقييم مكتمل' },
     { numberEn: '95%', numberAr: '95%', labelEn: 'Accuracy Rate', labelAr: 'معدل الدقة' },
     { numberEn: '24/7', numberAr: '24/7', labelEn: 'Available', labelAr: 'متاح' },
-    { numberEn: '50+', numberAr: '50+', labelEn: 'Healthcare Partners', labelAr: 'شريك في الرعاية الصحية' }
+    { numberEn: '50+', numberAr: '50+', labelEn: 'Healthcare Partners', labelAr: 'شريك في الرعاية الصحية' },
   ]
 
   const features = [
@@ -35,29 +34,29 @@ export default function AboutPage({ language = 'english' }: AboutPageProps) {
       titleEn: 'Advanced Assessment Tools',
       titleAr: 'أدوات تقييم متقدمة',
       descEn: 'Scientifically validated cognitive and functional assessment instruments',
-      descAr: 'أدوات تقييم معرفية ووظيفية معتمدة علمياً'
+      descAr: 'أدوات تقييم معرفية ووظيفية معتمدة علمياً',
     },
     {
       icon: Users,
       titleEn: 'Expert Clinical Team',
       titleAr: 'فريق طبي خبير',
       descEn: 'Board-certified healthcare professionals with specialized training',
-      descAr: 'متخصصون في الرعاية الصحية معتمدون مع تدريب متخصص'
+      descAr: 'متخصصون في الرعاية الصحية معتمدون مع تدريب متخصص',
     },
     {
       icon: Shield,
       titleEn: 'Privacy & Security',
       titleAr: 'الخصوصية والأمان',
       descEn: 'HIPAA-compliant security measures to protect your health information',
-      descAr: 'تدابير أمنية متوافقة مع معايير حماية المعلومات الصحية'
+      descAr: 'تدابير أمنية متوافقة مع معايير حماية المعلومات الصحية',
     },
     {
       icon: Clock,
       titleEn: 'Quick & Convenient',
       titleAr: 'سريع ومريح',
-      descEn: 'Complete assessments from the comfort of your home in 15-20 minutes',
-      descAr: 'أكمل التقييمات من راحة منزلك في 15-20 دقيقة'
-    }
+      descEn: 'Complete assessments from the comfort of your home in 15–20 minutes',
+      descAr: 'أكمل التقييمات من راحة منزلك في 15–20 دقيقة',
+    },
   ]
 
   const team = [
@@ -67,7 +66,7 @@ export default function AboutPage({ language = 'english' }: AboutPageProps) {
       roleEn: 'Clinical Director',
       roleAr: 'المديرة الطبية',
       specialtyEn: 'Neuropsychology',
-      specialtyAr: 'علم النفس العصبي'
+      specialtyAr: 'علم النفس العصبي',
     },
     {
       nameEn: 'Dr. Ahmed Hassan',
@@ -75,7 +74,7 @@ export default function AboutPage({ language = 'english' }: AboutPageProps) {
       roleEn: 'Senior Clinician',
       roleAr: 'طبيب أول',
       specialtyEn: 'Geriatric Medicine',
-      specialtyAr: 'طب المسنين'
+      specialtyAr: 'طب المسنين',
     },
     {
       nameEn: 'Dr. Fatima Al-Zahra',
@@ -83,119 +82,92 @@ export default function AboutPage({ language = 'english' }: AboutPageProps) {
       roleEn: 'Research Coordinator',
       roleAr: 'منسقة البحوث',
       specialtyEn: 'Cognitive Assessment',
-      specialtyAr: 'التقييم المعرفي'
-    }
+      specialtyAr: 'التقييم المعرفي',
+    },
   ]
 
   return (
-    <div className={`min-h-screen bg-white ${isArabic ? 'rtl' : 'ltr'}`}>
+    <div className={`min-h-screen ${isArabic ? 'rtl' : 'ltr'} font-sans bg-gradient-to-b from-[#f7f9ff] via-[#f2f4ff] to-[#ffffff]`}>
+      
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              {isArabic ? 'حول لاتنسا الصحية' : 'About Latnsa Health'}
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {isArabic 
-                ? 'نحن متخصصون في تقديم تقييمات صحية شاملة ودقيقة للمساعدة في الكشف المبكر عن التغييرات المعرفية والوظيفية'
-                : 'We specialize in providing comprehensive and accurate health assessments to help with early detection of cognitive and functional changes'
-              }
-            </p>
-          </div>
+      <section className="relative py-24 bg-gradient-to-br from-[#E6F0FF] via-[#F5F3FF] to-[#FFF5F7]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <img
+            src="/logo.jpeg"
+            alt="Latnsa Health Logo"
+            className="mx-auto mb-8 w-20 h-20 rounded-2xl shadow-lg"
+          />
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            {isArabic ? 'حول لاتنسا الصحية' : 'About Latnsa Health'}
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            {isArabic
+              ? 'نحن متخصصون في تقديم تقييمات صحية شاملة ودقيقة للمساعدة في الكشف المبكر عن التغييرات المعرفية والوظيفية'
+              : 'We specialize in providing comprehensive and accurate health assessments to help with early detection of cognitive and functional changes'}
+          </p>
         </div>
       </section>
 
       {/* Stats Section */}
       <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-4xl font-bold text-blue-600 mb-2">
-                  {isArabic ? stat.numberAr : stat.numberEn}
-                </div>
-                <div className="text-gray-600">
-                  {isArabic ? stat.labelAr : stat.labelEn}
-                </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+          {stats.map((stat, i) => (
+            <div key={i} className="p-4 rounded-2xl bg-gradient-to-br from-[#EEF3FF] to-[#F9FAFF] shadow-sm hover:shadow-md transition-shadow">
+              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#E76A6A] to-[#85C3E0] mb-2">
+                {isArabic ? stat.numberAr : stat.numberEn}
               </div>
-            ))}
-          </div>
+              <div className="text-gray-600">{isArabic ? stat.labelAr : stat.labelEn}</div>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* Mission Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                {isArabic ? 'مهمتنا' : 'Our Mission'}
-              </h2>
-              <p className="text-lg text-gray-600 mb-6">
-                {isArabic
-                  ? 'نهدف إلى توفير أدوات تقييم صحية متقدمة ومتاحة للجميع، مما يمكّن الأفراد ومقدمي الرعاية من اتخاذ قرارات مدروسة حول صحتهم المعرفية والوظيفية.'
-                  : 'We aim to provide advanced and accessible health assessment tools that empower individuals and caregivers to make informed decisions about their cognitive and functional health.'
-                }
-              </p>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <Target className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-gray-900">
-                      {isArabic ? 'الكشف المبكر' : 'Early Detection'}
-                    </h3>
-                    <p className="text-gray-600">
-                      {isArabic ? 'تحديد التغييرات المعرفية في مراحلها المبكرة' : 'Identify cognitive changes in their early stages'}
-                    </p>
+      <section className="py-20 bg-gradient-to-br from-[#FFF8FB] via-[#F4F7FF] to-[#EAF4FF]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              {isArabic ? 'مهمتنا' : 'Our Mission'}
+            </h2>
+            <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+              {isArabic
+                ? 'نهدف إلى توفير أدوات تقييم صحية متقدمة ومتاحة للجميع...'
+                : 'We aim to provide advanced and accessible health assessment tools...'}
+            </p>
+            <div className="space-y-4">
+              {[ 
+                { icon: Target, en: 'Early Detection', ar: 'الكشف المبكر', descEn: 'Identify cognitive changes early', descAr: 'تحديد التغييرات المعرفية في مراحلها المبكرة' },
+                { icon: Heart, en: 'Personalized Care', ar: 'رعاية شخصية', descEn: 'Tailored recommendations', descAr: 'توصيات مخصصة بناءً على احتياجاتك الفردية' },
+                { icon: Lightbulb, en: 'Health Education', ar: 'التثقيف الصحي', descEn: 'Promoting awareness', descAr: 'تعزيز الوعي بالصحة المعرفية' },
+              ].map((item, i) => {
+                const Icon = item.icon
+                return (
+                  <div key={i} className="flex items-start space-x-3">
+                    <Icon className="w-6 h-6 text-[#85C3E0] mt-1 flex-shrink-0" />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{isArabic ? item.ar : item.en}</h3>
+                      <p className="text-gray-600">{isArabic ? item.descAr : item.descEn}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <Heart className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-gray-900">
-                      {isArabic ? 'رعاية شخصية' : 'Personalized Care'}
-                    </h3>
-                    <p className="text-gray-600">
-                      {isArabic ? 'توصيات مخصصة بناءً على احتياجاتك الفردية' : 'Tailored recommendations based on your individual needs'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <Lightbulb className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-gray-900">
-                      {isArabic ? 'التثقيف الصحي' : 'Health Education'}
-                    </h3>
-                    <p className="text-gray-600">
-                      {isArabic ? 'تعزيز الوعي والفهم للصحة المعرفية' : 'Promoting awareness and understanding of cognitive health'}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                )
+              })}
             </div>
-            <div className="relative">
-              <div className="bg-white rounded-2xl shadow-2xl p-8">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Award className="w-10 h-10 text-blue-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    {isArabic ? 'معتمد دولياً' : 'Internationally Certified'}
-                  </h3>
-                  <p className="text-gray-600">
-                    {isArabic 
-                      ? 'أدوات التقييم لدينا معتمدة من قبل المنظمات الصحية الدولية'
-                      : 'Our assessment tools are certified by international health organizations'
-                    }
-                  </p>
-                  <div className="flex justify-center mt-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                </div>
-              </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="w-20 h-20 bg-gradient-to-r from-[#E76A6A] to-[#85C3E0] rounded-full flex items-center justify-center mx-auto mb-6">
+              <Award className="w-10 h-10 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              {isArabic ? 'معتمد دولياً' : 'Internationally Certified'}
+            </h3>
+            <p className="text-gray-600 mb-3">
+              {isArabic ? 'أدواتنا معتمدة من قبل المنظمات الصحية الدولية' : 'Our tools are certified by international organizations'}
+            </p>
+            <div className="flex justify-center">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+              ))}
             </div>
           </div>
         </div>
@@ -203,33 +175,27 @@ export default function AboutPage({ language = 'english' }: AboutPageProps) {
 
       {/* Features Section */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {isArabic ? 'ما يميزنا' : 'What Sets Us Apart'}
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {isArabic
-                ? 'نجمع بين التكنولوجيا المتقدمة والخبرة الطبية لتقديم تقييمات دقيقة وشاملة'
-                : 'We combine advanced technology with medical expertise to deliver accurate and comprehensive assessments'
-              }
-            </p>
-          </div>
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            {isArabic ? 'ما يميزنا' : 'What Sets Us Apart'}
+          </h2>
+          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
+            {isArabic
+              ? 'نجمع بين التكنولوجيا والخبرة الطبية...'
+              : 'We combine technology and medical expertise...'}
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => {
+            {features.map((feature, i) => {
               const Icon = feature.icon
               return (
-                <div key={index} className="text-center p-6 rounded-2xl hover:shadow-lg transition-shadow duration-300">
-                  <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Icon className="w-8 h-8 text-blue-600" />
+                <div key={i} className="p-6 rounded-2xl bg-gradient-to-br from-[#F8FAFF] to-[#FFFFFF] hover:shadow-xl transition-all border border-gray-100">
+                  <div className="w-16 h-16 bg-gradient-to-r from-[#E76A6A] to-[#85C3E0] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Icon className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     {isArabic ? feature.titleAr : feature.titleEn}
                   </h3>
-                  <p className="text-gray-600">
-                    {isArabic ? feature.descAr : feature.descEn}
-                  </p>
+                  <p className="text-gray-600">{isArabic ? feature.descAr : feature.descEn}</p>
                 </div>
               )
             })}
@@ -238,30 +204,26 @@ export default function AboutPage({ language = 'english' }: AboutPageProps) {
       </section>
 
       {/* Team Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {isArabic ? 'فريقنا الطبي' : 'Our Clinical Team'}
-            </h2>
-            <p className="text-xl text-gray-600">
-              {isArabic 
-                ? 'خبراء معتمدون في مجال الصحة المعرفية والوظيفية'
-                : 'Certified experts in cognitive and functional health'
-              }
-            </p>
-          </div>
-
+      <section className="py-20 bg-gradient-to-br from-[#F5F8FF] to-[#FFFFFF]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            {isArabic ? 'فريقنا الطبي' : 'Our Clinical Team'}
+          </h2>
+          <p className="text-xl text-gray-600 mb-12">
+            {isArabic
+              ? 'خبراء معتمدون في الصحة المعرفية'
+              : 'Certified experts in cognitive and functional health'}
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {team.map((member, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-lg p-8 text-center">
-                <div className="w-24 h-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            {team.map((member, i) => (
+              <div key={i} className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                <div className="w-24 h-24 bg-gradient-to-r from-[#E76A6A] to-[#85C3E0] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users className="w-12 h-12 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   {isArabic ? member.nameAr : member.nameEn}
                 </h3>
-                <p className="text-blue-600 font-medium mb-1">
+                <p className="text-[#85C3E0] font-medium mb-1">
                   {isArabic ? member.roleAr : member.roleEn}
                 </p>
                 <p className="text-gray-600">
@@ -275,58 +237,27 @@ export default function AboutPage({ language = 'english' }: AboutPageProps) {
 
       {/* Values Section */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {isArabic ? 'قيمنا' : 'Our Values'}
-            </h2>
-          </div>
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            {isArabic ? 'قيمنا' : 'Our Values'}
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {isArabic ? 'الدقة' : 'Accuracy'}
-              </h3>
-              <p className="text-gray-600">
-                {isArabic 
-                  ? 'نلتزم بأعلى معايير الدقة في جميع تقييماتنا'
-                  : 'We maintain the highest standards of accuracy in all our assessments'
-                }
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {isArabic ? 'التعاطف' : 'Compassion'}
-              </h3>
-              <p className="text-gray-600">
-                {isArabic 
-                  ? 'نقدم الرعاية بتعاطف وفهم لاحتياجات كل مريض'
-                  : 'We provide care with empathy and understanding of each patient\'s needs'
-                }
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {isArabic ? 'الثقة' : 'Trust'}
-              </h3>
-              <p className="text-gray-600">
-                {isArabic 
-                  ? 'نحمي خصوصيتك ونبني الثقة من خلال الشفافية'
-                  : 'We protect your privacy and build trust through transparency'
-                }
-              </p>
-            </div>
+            {[
+              { icon: CheckCircle, color: 'green', en: 'Accuracy', ar: 'الدقة', descEn: 'Highest standards of accuracy', descAr: 'نلتزم بأعلى معايير الدقة' },
+              { icon: Heart, color: 'blue', en: 'Compassion', ar: 'التعاطف', descEn: 'Care with empathy', descAr: 'نقدم الرعاية بتعاطف وفهم' },
+              { icon: Shield, color: 'purple', en: 'Trust', ar: 'الثقة', descEn: 'Protecting privacy & transparency', descAr: 'نحمي خصوصيتك ونبني الثقة' },
+            ].map((val, i) => {
+              const Icon = val.icon
+              return (
+                <div key={i} className="bg-gradient-to-br from-[#F8FAFF] to-[#FFFFFF] p-8 rounded-2xl hover:shadow-lg transition-shadow">
+                  <div className={`w-16 h-16 bg-${val.color}-100 rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+                    <Icon className={`w-8 h-8 text-${val.color}-600`} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{isArabic ? val.ar : val.en}</h3>
+                  <p className="text-gray-600">{isArabic ? val.descAr : val.descEn}</p>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>

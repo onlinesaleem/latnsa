@@ -26,11 +26,13 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
   const [language, setLanguage] = useState<'english' | 'arabic'>(initialLanguage)
   const router = useRouter()
   const isArabic = language === 'arabic'
- // language toggle handler
+
+  // language toggle handler
   const toggleLanguage = () => {
     setLanguage(prev => (prev === 'english' ? 'arabic' : 'english'))
     // Note: RTL/LTR handled by root div class in returned JSX
   }
+
   const features = [
     {
       icon: Brain,
@@ -85,9 +87,10 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
 
   return (
     <div className={`min-h-screen bg-white ${isArabic ? 'rtl' : 'ltr'}`}>
-    
+      {/* -------------------- HEADER (ADDED) -------------------- */}
+     
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 overflow-hidden pt-32">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-full max-w-7xl mx-auto">
@@ -110,14 +113,14 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
                   {isArabic ? (
                     <>
                       تقييم صحي{' '}
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E76A6A] to-[#85C3E0]">
                         شامل
                       </span>
                     </>
                   ) : (
                     <>
                       Comprehensive{' '}
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E76A6A] to-[#85C3E0]">
                         Health
                       </span>{' '}
                       Assessment
@@ -136,7 +139,7 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   href="/auth/register"
-                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-[#E76A6A] to-[#85C3E0] rounded-xl hover:from-[#d85858] hover:to-[#6ebfe6] transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   {isArabic ? 'ابدأ التقييم' : 'Start Assessment'}
                   <ArrowRight className={`w-5 h-5 ${isArabic ? 'mr-2' : 'ml-2'}`} />
@@ -174,12 +177,12 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
             {/* Hero Image/Illustration */}
             <div className="relative">
               <div className="relative bg-white rounded-2xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl transform rotate-6"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#E76A6A] to-[#85C3E0] rounded-2xl transform rotate-6"></div>
                 <div className="relative bg-white rounded-xl p-6">
                   <div className="space-y-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                        <Brain className="w-6 h-6 text-blue-600" />
+                      <div className="w-12 h-12 bg-[#85C3E0]/10 rounded-xl flex items-center justify-center">
+                        <Brain className="w-6 h-6 text-[#E76A6A]" />
                       </div>
                       <div>
                         <div className="font-semibold text-gray-900">
@@ -196,10 +199,10 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
                         <span className="text-gray-600">
                           {isArabic ? 'التقدم' : 'Progress'}
                         </span>
-                        <span className="font-semibold text-blue-600">75%</span>
+                        <span className="font-semibold text-[#85C3E0]">75%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+                        <div className="bg-[#85C3E0] h-2 rounded-full" style={{ width: '75%' }}></div>
                       </div>
                     </div>
 
@@ -215,14 +218,14 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
                           {isArabic ? 'المعلومات الأساسية' : 'Basic Info'}
                         </div>
                       </div>
-                      <div className="bg-blue-50 p-3 rounded-lg">
+                      <div className="bg-[#85C3E0]/10 p-3 rounded-lg">
                         <div className="flex items-center space-x-1">
-                          <Clock className="w-3 h-3 text-blue-600" />
-                          <span className="text-blue-800 font-medium">
+                          <Clock className="w-3 h-3 text-[#85C3E0]" />
+                          <span className="text-[#85C3E0]/90 font-medium">
                             {isArabic ? 'الحالي' : 'Current'}
                           </span>
                         </div>
-                        <div className="text-blue-600 mt-1">
+                        <div className="text-[#85C3E0] mt-1">
                           {isArabic ? 'الأعراض' : 'Symptoms'}
                         </div>
                       </div>
@@ -256,10 +259,10 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
               return (
                 <div
                   key={index}
-                  className="group p-6 bg-white rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  className="group p-6 bg-white rounded-2xl border border-gray-100 hover:border-[#85C3E0]/40 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
                 >
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors duration-300">
-                    <Icon className="w-6 h-6 text-blue-600" />
+                  <div className="w-12 h-12 bg-[#85C3E0]/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#85C3E0]/20 transition-colors duration-300">
+                    <Icon className="w-6 h-6 text-[#E76A6A]" />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     {isArabic ? feature.titleAr : feature.titleEn}
@@ -292,8 +295,8 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
               <div className="space-y-6">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <CheckCircle className="w-5 h-5 text-blue-600" />
+                    <div className="w-8 h-8 bg-[#85C3E0]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <CheckCircle className="w-5 h-5 text-[#E76A6A]" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-1">
@@ -331,11 +334,11 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                    <span className="text-blue-800 font-medium">
+                  <div className="flex items-center justify-between p-3 bg-[#85C3E0]/10 rounded-lg">
+                    <span className="text-[#85C3E0]/90 font-medium">
                       {isArabic ? 'الأنشطة اليومية' : 'Daily Activities'}
                     </span>
-                    <div className="text-blue-600 font-semibold">85/100</div>
+                    <div className="text-[#85C3E0] font-semibold">85/100</div>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
@@ -352,7 +355,7 @@ export default function LandingPage({ initialLanguage = 'english' }: LandingPage
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-20 bg-gradient-to-r from-[#E76A6A] to-[#85C3E0]">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
             {isArabic ? 'ابدأ تقييمك الصحي اليوم' : 'Start Your Health Assessment Today'}
