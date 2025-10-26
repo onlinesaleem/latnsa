@@ -3,11 +3,12 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { Toaster } from 'react-hot-toast'
 import RegistrationComponent from '@/components/RegistrationComponent'
+import { User } from '@prisma/client'
 
 export default function RegistrationPage() {
   const router = useRouter()
 
-  const handleRegistrationSuccess = (userData: any) => {
+  const handleRegistrationSuccess = (_userData: User) => {
     // Redirect to assessment form after successful registration
     router.push('/assessment')
   }

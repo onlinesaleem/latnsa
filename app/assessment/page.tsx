@@ -2,9 +2,10 @@
 import React from 'react'
 import { Toaster } from 'react-hot-toast'
 import AssessmentForm from '@/components/AssessmentForm'
+import { Assessment } from '@prisma/client'
 
 export default function AssessmentPage() {
-  const handleAssessmentComplete = (assessmentData: any) => {
+  const handleAssessmentComplete = (assessmentData: Assessment) => {
     // Assessment completed successfully
     console.log('Assessment completed:', assessmentData)
   }

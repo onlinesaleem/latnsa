@@ -6,7 +6,7 @@ import { authOptions } from '@/lib/auth'
 import LandingPage from '@/components/LandingPage'
 
 export default async function HomePage() {
-  const session = await getServerSession(authOptions)
+  //const session = await getServerSession(authOptions)
     return <LandingPage />
   // If user is logged in, redirect based on role
   // if (session) {

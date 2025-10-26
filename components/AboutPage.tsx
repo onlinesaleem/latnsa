@@ -1,5 +1,5 @@
 'use client'
-
+import Image from 'next/image';
 import React from 'react'
 import {
   Brain,
@@ -92,11 +92,14 @@ export default function AboutPage({ language = 'english' }: AboutPageProps) {
       {/* Hero Section */}
       <section className="relative py-24 bg-gradient-to-br from-[#E6F0FF] via-[#F5F3FF] to-[#FFF5F7]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <img
-            src="/logo.jpeg"
-            alt="Latnsa Health Logo"
-            className="mx-auto mb-8 w-20 h-20 rounded-2xl shadow-lg"
-          />
+  <Image
+  src="/logo.jpeg"
+  alt="Latnsa Health Logo"
+  className="mx-auto mb-8 rounded-2xl shadow-lg"
+  width={80}  // Required - equivalent to w-20 (20 * 4 = 80)
+  height={80} // Required - equivalent to h-20 (20 * 4 = 80)
+  priority={true} // Optional: if this is above the fold/important image
+/>
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
             {isArabic ? 'حول لاتنسا الصحية' : 'About Latnsa Health'}
           </h1>

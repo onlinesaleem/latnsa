@@ -21,6 +21,7 @@ const appointmentSchema = z.object({
 })
 
 // CREATE Appointment
+// CREATE Appointment
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -34,6 +35,31 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const appointmentData = appointmentSchema.parse(body)
+
+    // First, find or create the patient using findFirst (since email is not unique)
+    let patient = await prisma.patient.findFirst({
+      where: { 
+        email: appointmentData.patientEmail,
+        isActive: true
+      }
+    })
+
+    if (!patient) {
+      // Generate a readable MRN (Medical Record Number)
+      const timestamp = Date.now().toString().slice(-8)
+      const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase()
+      const mrn = `MRN-${timestamp}-${randomSuffix}`
+
+      patient = await prisma.patient.create({
+        data: {
+          fullName: appointmentData.patientName,
+          email: appointmentData.patientEmail,
+          phone: appointmentData.patientPhone || null,
+          mrn: mrn,
+          isActive: true
+        }
+      })
+    }
 
     // Check for scheduling conflicts
     const conflictingAppointment = await prisma.appointment.findFirst({
@@ -70,7 +96,7 @@ export async function POST(request: NextRequest) {
             join_before_host: false,
             waiting_room: true,
             mute_upon_entry: true,
-            approval_type: 1, // Manually approve
+            approval_type: 1,
             audio: 'both',
             video: true,
             enforce_login: false
@@ -88,20 +114,33 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create appointment in database
+    // Create appointment in database with patientId
     const appointment = await prisma.appointment.create({
       data: {
-        ...appointmentData,
+        patientId: patient.id,
+        type: appointmentData.type,
         scheduledAt: new Date(appointmentData.scheduledAt),
+        duration: appointmentData.duration,
+        notes: appointmentData.notes || null,
+        language: appointmentData.language,
+        assessmentId: appointmentData.assessmentId || null,
+        clinicianId: appointmentData.clinicianId || null,
         meetingUrl,
         meetingId,
         createdBy: session.user.id,
         status: 'SCHEDULED'
+      },
+      include: {
+        patient: true
       }
     })
 
     // Send confirmation email
-    await sendAppointmentConfirmation(appointment, appointmentData.language)
+    await sendAppointmentConfirmation({
+      ...appointment,
+      patientName: patient.fullName,
+      patientEmail: patient.email || appointmentData.patientEmail
+    }, appointmentData.language)
 
     // Schedule reminder emails
     await scheduleReminders(appointment)
@@ -130,7 +169,6 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-
 // GET Appointments
 export async function GET(request: NextRequest) {
   try {

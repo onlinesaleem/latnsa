@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { Language, AssessmentStatus, AnswerType } from '@prisma/client'
+import {  AssessmentStatus, AnswerType } from '@prisma/client'
 import { z } from 'zod'
-
+type AnswerValue = string | number | boolean | string[] | Date;
 const saveProgressSchema = z.object({
   patientId: z.string(),
   formType: z.enum(['SELF', 'PROXY']),
@@ -38,7 +38,7 @@ async function generateAssessmentNumber(): Promise<string> {
 }
 
 // Helper function to determine answer type
-function determineAnswerType(value: any, questionType?: string): AnswerType {
+function determineAnswerType(value: AnswerValue, questionType?: string): AnswerType {
   if (Array.isArray(value)) return AnswerType.MULTIPLE_CHOICE
   if (typeof value === 'boolean') return AnswerType.BOOLEAN
   if (typeof value === 'number') return AnswerType.NUMBER
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
       )
 
       const responseRecords = Object.entries(validatedData.responses)
-        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        .filter(([ value]) => value !== undefined && value !== null && value !== '')
         .map(([questionId, answerValue]) => {
           const question = questionMap.get(questionId)
           
@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
       )
 
       const responseRecords = Object.entries(validatedData.responses)
-        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        .filter(([ value]) => value !== undefined && value !== null && value !== '')
         .map(([questionId, answerValue]) => {
           const question = questionMap.get(questionId)
           

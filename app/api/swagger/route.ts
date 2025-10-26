@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // This function runs only on the server
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Import the server-side module only here (it won't be bundled with client code)
   const { createSwaggerSpec } = await import('next-swagger-doc');
   
