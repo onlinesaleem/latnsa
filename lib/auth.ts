@@ -7,6 +7,9 @@ import { prisma } from "./prisma"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
+  // ADD THIS - CRITICAL!
+  secret: process.env.NEXTAUTH_SECRET,
+  
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -67,5 +70,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/signin",
-  }
+  },
+  // ADD THIS TOO - helps with debugging
+  debug: process.env.NODE_ENV === 'development',
 }
