@@ -76,8 +76,9 @@ export default function AssessmentForm({ onComplete, language = 'english' }: Ass
   const [questionGroups, setQuestionGroups] = useState<QuestionGroup[]>([])
   const [responses, setResponses] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(false)
-  const [isArabic, setIsArabic] = useState(language === 'arabic')
-
+  //const [isArabic, setIsArabic] = useState(language === 'arabic')
+  const isArabic = language === 'arabic'
+ // const [renderKey, setRenderKey] = useState(0)
   // Patient information (the person being assessed)
   const [patientInfo, setPatientInfo] = useState<PatientInfo>({
     fullName: '',
@@ -99,7 +100,9 @@ export default function AssessmentForm({ onComplete, language = 'english' }: Ass
   // Created patient ID (after patient creation)
   const [patientId, setPatientId] = useState<string | null>(null)
   const [patientMRN, setPatientMRN] = useState<string | null>(null)
-
+  // useEffect(() => {
+  //   setRenderKey(prev => prev + 1)
+  // }, [language])
   // Load questions on component mount
   useEffect(() => {
     loadQuestions()
@@ -478,7 +481,7 @@ export default function AssessmentForm({ onComplete, language = 'english' }: Ass
   if (currentStep === 'selection') {
     return (
       <div className={`max-w-2xl mx-auto p-6 ${isArabic ? 'rtl' : 'ltr'}`}>
-        {/* Language Toggle */}
+        {/* Language Toggle
         <div className="flex justify-center mb-6">
           <div className="bg-gray-100 rounded-lg p-1 flex">
             <button
@@ -494,8 +497,11 @@ export default function AssessmentForm({ onComplete, language = 'english' }: Ass
               العربية
             </button>
           </div>
-        </div>
-
+        </div> */}
+// Add this temporary debug component at the top of your AssessmentForm return
+{/* <div className="fixed top-20 right-4 bg-red-500 text-white p-2 rounded z-50">
+  Debug: {language} - {isArabic ? 'RTL' : 'LTR'} - Key: {renderKey}
+</div> */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             {isArabic ? 'تقييم صحي شامل' : 'Comprehensive Health Assessment'}

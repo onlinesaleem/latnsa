@@ -2,7 +2,8 @@
 @tailwind base;
 @tailwind utilities;
 @tailwind components;
-
+/* Import Arabic fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap');
 /* === THEME COLORS === */
 :root {
   --theme-red: #e76c8d;
@@ -45,14 +46,73 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-/* Arabic font and RTL styles remain */
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
 
+
+/* Scrollbar styles, forms, etc. remain unchanged */
+
+/* Arabic font classes */
+.font-arabic {
+  font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
+  letter-spacing: 0;
+}
+
+/* RTL Support */
 .rtl {
   direction: rtl;
 }
+
 .ltr {
   direction: ltr;
 }
 
-/* Scrollbar styles, forms, etc. remain unchanged */
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: color, background-color, border-color, transform, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced animations */
+@keyframes slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+}
+
+.fade-in {
+  animation-name: fade-in;
+}
+
+.slide-in-from-top-2 {
+  animation-name: slide-in-from-top;
+}
+
+/* Better Arabic text rendering */
+.font-arabic * {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Profile dropdown improvements */
+.profile-dropdown {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
