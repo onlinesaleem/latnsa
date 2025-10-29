@@ -32,7 +32,7 @@ export default function AssessmentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 mt-16">
       <AssessmentForm 
         
         onComplete={handleAssessmentComplete} 

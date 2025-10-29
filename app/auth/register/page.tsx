@@ -19,10 +19,10 @@ export default function RegistrationPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Healthcare Assessment System
+            Memory Assessment System
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Welcome to Latnsa Healthcare Assessment. Please register to begin your health evaluation.
+            Welcome to Latnsa Memory Assessment. Please register to begin your health evaluation.
           </p>
         </div>
 
@@ -36,7 +36,7 @@ export default function RegistrationPage() {
 
         {/* Footer */}
         <div className="text-center mt-12 text-sm text-gray-500">
-          <p>© 2024 Latnsa Healthcare Assessment System</p>
+          <p>© 2024 Latnsa Memory Assessment System</p>
           <p className="mt-2">
             Secure and confidential health assessment platform
           </p>

@@ -125,7 +125,7 @@ console.log("the user role is "+userData?.role);
               {isArabic ? 'لطنسا للصحة' : 'Latnsa Health'}
             </h1>
             <p className={`text-xs text-gray-600 -mt-0.5 ${isArabic ? 'font-arabic' : ''}`}>
-              {isArabic ? 'نظام التقييم الصحي' : 'Health Assessment System'}
+              {isArabic ? '  عيادة لاتنسى الافتراضية' : 'Memory Assessment System'}
             </p>
           </div>
         </Link>

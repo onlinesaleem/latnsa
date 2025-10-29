@@ -7,11 +7,25 @@ import { z } from 'zod'
 import { Mail, Phone, User, Lock, Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
+// Improved email validation with better domain checking
+const emailValidation = z.string().email('Please enter a valid email address')
+const phoneValidation = z.string().regex(/^(\+966|966|0)?[0-9]{8,9}$/, 'Please enter a valid Saudi phone number')
+
 const registrationSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  identifier: z.string().min(1, 'Email or phone is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
+  identifier: z.union([emailValidation, phoneValidation]),
+  password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')),
   language: z.enum(['english', 'arabic'])
+}).refine((data) => {
+  // Custom refinement to ensure identifier is properly validated
+  const isEmail = data.identifier.includes('@')
+  if (isEmail) {
+    return emailValidation.safeParse(data.identifier).success
+  }
+  return phoneValidation.safeParse(data.identifier).success
+}, {
+  message: 'Please enter a valid email or phone number',
+  path: ['identifier']
 })
 
 type RegistrationForm = z.infer<typeof registrationSchema>
@@ -22,7 +36,6 @@ interface RegistrationProps {
 }
 
 export default function RegistrationComponent({ onSuccess, requirePassword = true }: RegistrationProps) {
-  // Default language is Arabic as requested
   const [currentStep, setCurrentStep] = useState<'form' | 'otp' | 'success'>('form')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -36,12 +49,17 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     watch,
-    setValue
+    setValue,
+    trigger
   } = useForm<RegistrationForm>({
     resolver: zodResolver(registrationSchema),
-    defaultValues: { language: 'arabic' }
+    defaultValues: { 
+      language: 'arabic',
+      password: ''
+    },
+    mode: 'onChange' // Validate on change for better UX
   })
 
   // Keep react-hook-form language in sync with local state
@@ -51,23 +69,54 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
 
   const watchedIdentifier = watch('identifier')
 
-  // Auto-detect identifier type
+  // Improved auto-detect identifier type with better validation
   useEffect(() => {
     if (watchedIdentifier) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      // More comprehensive email regex
+      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
       const phoneRegex = /^(\+966|966|0)?[0-9]{8,9}$/
 
       if (emailRegex.test(watchedIdentifier)) {
-        setOtpType('EMAIL')
-      } else if (phoneRegex.test(watchedIdentifier)) {
+        // Additional check to ensure there's a domain with at least 2 characters
+        const parts = watchedIdentifier.split('@')
+        if (parts.length === 2 && parts[1].includes('.') && parts[1].split('.')[1]?.length >= 2) {
+          setOtpType('EMAIL')
+        }
+      } else if (phoneRegex.test(watchedIdentifier.replace(/\s/g, ''))) {
         setOtpType('SMS')
       }
       setIdentifierValue(watchedIdentifier)
+      
+      // Trigger validation when identifier changes
+      trigger('identifier')
     }
-  }, [watchedIdentifier])
+  }, [watchedIdentifier, trigger])
+
+  // Helper function to validate email format
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+    if (!emailRegex.test(email)) return false
+    
+    const parts = email.split('@')
+    if (parts.length !== 2) return false
+    
+    const domain = parts[1]
+    return domain.includes('.') && domain.split('.')[1]?.length >= 2
+  }
+
+  // Helper function to validate phone format
+  const isValidPhone = (phone: string): boolean => {
+    const phoneRegex = /^(\+966|966|0)?[0-9]{8,9}$/
+    return phoneRegex.test(phone.replace(/\s/g, ''))
+  }
 
   const handleSendOtp = async (data: RegistrationForm) => {
-    // ensure language exists on data (zod will validate), but fallback to local state
+    // Validate identifier before proceeding
+    if (!isValidEmail(data.identifier) && !isValidPhone(data.identifier)) {
+      toast.error(language === 'arabic' ? 'يرجى إدخال بريد إلكتروني أو رقم هاتف صالح' : 'Please enter a valid email or phone number')
+      return
+    }
+
     const langToSend = data.language ?? language
     setLoading(true)
     try {
@@ -93,7 +142,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
         toast.error(language === 'arabic' ? result.errorAr : result.error)
       }
     } catch (error) {
-      toast.error('Failed to send verification code')
+      toast.error(language === 'arabic' ? 'فشل في إرسال رمز التحقق' : 'Failed to send verification code')
     } finally {
       setLoading(false)
     }
@@ -146,11 +195,14 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
       } else {
         toast.error(language === 'arabic' ? verifyResult.errorAr : verifyResult.error)
         if (verifyResult.attemptsLeft !== undefined) {
-          toast.error(`Attempts left: ${verifyResult.attemptsLeft}`)
+          toast.error(language === 'arabic' 
+            ? `المحاولات المتبقية: ${verifyResult.attemptsLeft}`
+            : `Attempts left: ${verifyResult.attemptsLeft}`
+          )
         }
       }
     } catch (error) {
-      toast.error('Verification failed')
+      toast.error(language === 'arabic' ? 'فشل التحقق' : 'Verification failed')
     } finally {
       setLoading(false)
     }
@@ -181,7 +233,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
         toast.error(language === 'arabic' ? result.errorAr : result.error)
       }
     } catch (error) {
-      toast.error('Failed to resend code')
+      toast.error(language === 'arabic' ? 'فشل في إعادة إرسال الرمز' : 'Failed to resend code')
     } finally {
       setLoading(false)
     }
@@ -207,8 +259,6 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
       </div>
     )
   }
-  console.log('RegistrationComponent: requirePassword=', requirePassword, 'language=', language)
-
 
   if (currentStep === 'otp') {
     return (
@@ -304,7 +354,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
         </p>
       </div>
 
-      <div className="space-y-4">
+      <form onSubmit={handleSubmit(handleSendOtp)} className="space-y-4">
         {/* Name Field */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -315,7 +365,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
             <input
               {...register('name')}
               type="text"
-              className={`w-full ${isArabic ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500`}
+              className={`w-full ${isArabic ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
               placeholder={isArabic ? 'أدخل اسمك الكامل' : 'Enter your full name'}
             />
           </div>
@@ -338,11 +388,11 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
             <input
               {...register('identifier')}
               type="text"
-              className={`w-full ${isArabic ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500`}
+              className={`w-full ${isArabic ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border ${errors.identifier ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
               placeholder={isArabic ? 'example@email.com أو 0501234567' : 'example@email.com or 0501234567'}
             />
           </div>
-          {watchedIdentifier && (
+          {watchedIdentifier && !errors.identifier && (
             <p className="text-sm text-blue-600 mt-1">
               {isArabic ? 'سيتم الإرسال عبر:' : 'Will send via:'} {otpType === 'EMAIL' ? (isArabic ? 'البريد الإلكتروني' : 'Email') : (isArabic ? 'رسالة نصية' : 'SMS')}
             </p>
@@ -353,7 +403,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
         </div>
 
         {/* Password Field (Optional) */}
-        
+        {/* //{requirePassword && ( */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {isArabic ? 'كلمة المرور (اختياري)' : 'Password (Optional)'}
@@ -363,7 +413,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
               <input
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
-                className={`w-full ${isArabic ? 'pr-10 pl-10' : 'pl-10 pr-10'} py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500`}
+                className={`w-full ${isArabic ? 'pr-10 pl-10' : 'pl-10 pr-10'} py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
                 placeholder={isArabic ? 'أدخل كلمة مرور (اختياري)' : 'Enter password (optional)'}
               />
               <button
@@ -378,16 +428,15 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
               <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
             )}
           </div>
-        
+        {/* )} */}
 
-        {/* Hidden language field (kept for form validation) */}
+        {/* Hidden language field */}
         <input {...register('language')} type="hidden" />
 
         {/* Submit Button */}
         <button
-         type="button" 
-          onClick={handleSubmit(handleSendOtp)}
-          disabled={loading}
+          type="submit"
+          disabled={loading || !isValid}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {loading ? (
@@ -413,7 +462,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
             : 'We will send you a verification code to confirm your identity before proceeding'
           }
         </div>
-      </div>
+      </form>
     </div>
   )
 }
