@@ -3,29 +3,31 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Toaster } from 'react-hot-toast'
 import AssessmentForm from '@/components/AssessmentForm'
 import { Assessment } from '@prisma/client'
+import { useLanguage } from '@/components/MainLayout'
+
 
 export default function AssessmentPage() {
-  const [language, setLanguage] = useState<'english' | 'arabic'>('english')
-  const lastLanguageRef = useRef(language)
-
+  //const [language, setLanguage] = useState<'english' | 'arabic'>('english')
+  //const lastLanguageRef = useRef(language)
+ const { language } = useLanguage();
   // Optimized polling for language changes
-  useEffect(() => {
-    const checkLanguage = () => {
-      const savedLanguage = localStorage.getItem('preferred-language') as 'english' | 'arabic' | null
-      if (savedLanguage && savedLanguage !== lastLanguageRef.current) {
-        lastLanguageRef.current = savedLanguage
-        setLanguage(savedLanguage)
-      }
-    }
+  // useEffect(() => {
+  //   // const checkLanguage = () => {
+  //   //   const savedLanguage = localStorage.getItem('preferred-language') as 'english' | 'arabic' | null
+  //   //   if (savedLanguage && savedLanguage !== lastLanguageRef.current) {
+  //   //     lastLanguageRef.current = savedLanguage
+  //   //     setLanguage(savedLanguage)
+  //   //   }
+  //   // }
 
-    // Check immediately
-    checkLanguage()
+  //   // Check immediately
+  //   //checkLanguage()
 
-    // Set up interval to check for changes - reduced frequency
-    const interval = setInterval(checkLanguage, 1000) // Increased to 1 second
+  //   // Set up interval to check for changes - reduced frequency
+  //   const interval = setInterval(checkLanguage, 1000) // Increased to 1 second
     
-    return () => clearInterval(interval)
-  }, []) // Remove language dependency to prevent loops
+  //   return () => clearInterval(interval)
+  // }, []) // Remove language dependency to prevent loops
 
   const handleAssessmentComplete = (assessmentData: Assessment) => {
     console.log('Assessment completed:', assessmentData)

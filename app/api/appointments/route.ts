@@ -16,11 +16,29 @@ const appointmentSchema = z.object({
   duration: z.number().min(15).max(180).default(30),
   notes: z.string().optional(),
   language: z.enum(['ENGLISH', 'ARABIC']).default('ENGLISH'),
-  assessmentId: z.string().optional(), // Link to existing assessment
+  assessmentId: z.string().optional(),
   clinicianId: z.string().optional()
 })
 
-// CREATE Appointment
+// Helper function to convert Saudi time to UTC properly
+function convertSaudiTimeToUTC(dateTimeString: string): Date {
+  // Parse the date-time string as if it's in Saudi Arabia timezone
+  // Saudi Arabia is GMT+3 (no DST)
+  const localDate = new Date(dateTimeString)
+  
+  // Get the time components
+  const year = localDate.getFullYear()
+  const month = localDate.getMonth()
+  const day = localDate.getDate()
+  const hours = localDate.getHours()
+  const minutes = localDate.getMinutes()
+  
+  // Create a date string in Saudi timezone format
+  const saudiTimeString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00+03:00`
+  
+  return new Date(saudiTimeString)
+}
+
 // CREATE Appointment
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +54,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const appointmentData = appointmentSchema.parse(body)
 
-    // First, find or create the patient using findFirst (since email is not unique)
+    console.log('📅 Received appointment time:', appointmentData.scheduledAt)
+
+    // Convert Saudi time to proper UTC
+    const scheduledAtUTC = convertSaudiTimeToUTC(appointmentData.scheduledAt)
+    console.log('🌍 Converted to UTC:', scheduledAtUTC.toISOString())
+    console.log('🇸🇦 Saudi time display:', scheduledAtUTC.toLocaleString('en-US', { timeZone: 'Asia/Riyadh' }))
+
+    // First, find or create the patient
     let patient = await prisma.patient.findFirst({
       where: { 
         email: appointmentData.patientEmail,
@@ -45,7 +70,6 @@ export async function POST(request: NextRequest) {
     })
 
     if (!patient) {
-      // Generate a readable MRN (Medical Record Number)
       const timestamp = Date.now().toString().slice(-8)
       const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase()
       const mrn = `MRN-${timestamp}-${randomSuffix}`
@@ -61,10 +85,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Check for scheduling conflicts
+    // Check for conflicts using the UTC time
     const conflictingAppointment = await prisma.appointment.findFirst({
       where: {
-        scheduledAt: new Date(appointmentData.scheduledAt),
+        scheduledAt: scheduledAtUTC,
         status: {
           not: 'CANCELLED'
         },
@@ -85,41 +109,71 @@ export async function POST(request: NextRequest) {
     let meetingId = null
 
     // Create Zoom meeting for virtual consultations
+   // Create Zoom meeting for virtual consultations
     if (appointmentData.type === 'VIRTUAL_CONSULTATION' || appointmentData.type === 'VIDEO_CALL') {
       try {
         const zoomService = new ZoomService()
+        
+        // IMPORTANT: Zoom expects start_time in the format YYYY-MM-DDTHH:mm:ss
+        // When timezone is specified, do NOT include Z or timezone offset in start_time
+        // Zoom will interpret the time as being in the specified timezone
+        
+        // Get the Saudi time components from the original input
+        const originalDateTime = new Date(appointmentData.scheduledAt)
+        const year = originalDateTime.getFullYear()
+        const month = String(originalDateTime.getMonth() + 1).padStart(2, '0')
+        const day = String(originalDateTime.getDate()).padStart(2, '0')
+        const hours = String(originalDateTime.getHours()).padStart(2, '0')
+        const minutes = String(originalDateTime.getMinutes()).padStart(2, '0')
+        
+        // Format for Zoom: YYYY-MM-DDTHH:mm:ss (no Z, no timezone offset)
+        const zoomMeetingTime = `${year}-${month}-${day}T${hours}:${minutes}:00`
+        
+        console.log('📹 Creating Zoom meeting for Saudi time:', zoomMeetingTime)
+        console.log('📹 With timezone: Asia/Riyadh')
+        
         const zoomMeeting = await zoomService.createMeeting({
           topic: `Healthcare Consultation - ${appointmentData.patientName}`,
-          start_time: appointmentData.scheduledAt,
+          start_time: zoomMeetingTime, // Use the formatted time without timezone
           duration: appointmentData.duration,
+          timezone: 'Asia/Riyadh', // This tells Zoom to interpret the time as Saudi time
           settings: {
             join_before_host: false,
             waiting_room: true,
             mute_upon_entry: true,
-            approval_type: 1,
+            approval_type: 0,
             audio: 'both',
             video: true,
-            enforce_login: false
+            enforce_login: false,
+            participant_video: true,
+            host_video: true,
+            auto_recording: 'cloud'
           }
+        })
+        
+        console.log('✅ Zoom meeting created:', {
+          id: zoomMeeting.id,
+          start_time: zoomMeeting.start_time,
+          timezone: zoomMeeting.timezone,
+          join_url: zoomMeeting.join_url
         })
         
         meetingUrl = zoomMeeting.join_url
         meetingId = zoomMeeting.id.toString()
       } catch (error) {
-        console.error('Failed to create Zoom meeting:', error)
+        console.error('❌ Failed to create Zoom meeting:', error)
         return NextResponse.json(
-          { error: 'Failed to create virtual consultation' },
+          { error: 'Failed to create virtual consultation', details: error instanceof Error ? error.message : 'Unknown error' },
           { status: 500 }
         )
       }
     }
-
-    // Create appointment in database with patientId
+    // Create appointment in database
     const appointment = await prisma.appointment.create({
       data: {
         patientId: patient.id,
         type: appointmentData.type,
-        scheduledAt: new Date(appointmentData.scheduledAt),
+        scheduledAt: scheduledAtUTC, // Store UTC time in database
         duration: appointmentData.duration,
         notes: appointmentData.notes || null,
         language: appointmentData.language,
@@ -133,6 +187,12 @@ export async function POST(request: NextRequest) {
       include: {
         patient: true
       }
+    })
+
+    console.log('✅ Appointment created in database:', {
+      id: appointment.id,
+      scheduledAt: appointment.scheduledAt.toISOString(),
+      saudiTime: appointment.scheduledAt.toLocaleString('en-US', { timeZone: 'Asia/Riyadh' })
     })
 
     // Send confirmation email
@@ -154,7 +214,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Create appointment error:', error)
+    console.error('❌ Create appointment error:', error)
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -164,11 +224,12 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Failed to create appointment' },
+      { error: 'Failed to create appointment', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
 }
+
 // GET Appointments
 export async function GET(request: NextRequest) {
   try {
@@ -190,9 +251,12 @@ export async function GET(request: NextRequest) {
     const where: any = {}
 
     if (date) {
-      const startOfDay = new Date(date)
+      // Convert the date to Saudi timezone boundaries
+      const saudiDate = new Date(date + 'T00:00:00+03:00')
+      const startOfDay = new Date(saudiDate)
       startOfDay.setHours(0, 0, 0, 0)
-      const endOfDay = new Date(date)
+      
+      const endOfDay = new Date(saudiDate)
       endOfDay.setHours(23, 59, 59, 999)
       
       where.scheduledAt = {
@@ -216,7 +280,7 @@ export async function GET(request: NextRequest) {
         scheduledAt: 'asc'
       },
       include: {
-        // Only include assessment if assessmentId is not null
+        patient: true,
         assessment: {
           select: {
             id: true,
@@ -232,7 +296,16 @@ export async function GET(request: NextRequest) {
       success: true,
       appointments: appointments.map(appointment => ({
         ...appointment,
-        // Only include assessment if it exists
+        // Add Saudi time for frontend display
+        scheduledAtSaudi: appointment.scheduledAt.toLocaleString('en-US', { 
+          timeZone: 'Asia/Riyadh',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }),
         assessment: appointment.assessment || null
       }))
     })
@@ -255,9 +328,11 @@ async function sendAppointmentConfirmation(appointment: any, language: string) {
     `تأكيد الموعد - ${appointment.patientName}` :
     `Appointment Confirmation - ${appointment.patientName}`
 
-  const appointmentDate = new Date(appointment.scheduledAt).toLocaleString(
+  // Format date in Saudi timezone
+  const appointmentDate = appointment.scheduledAt.toLocaleString(
     isArabic ? 'ar-SA' : 'en-US',
     {
+      timeZone: 'Asia/Riyadh',
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -294,7 +369,7 @@ async function sendAppointmentConfirmation(appointment: any, language: string) {
               <td style="padding: 8px 0; color: #6b7280;">${appointmentTypeText[appointment.type as keyof typeof appointmentTypeText]}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; font-weight: bold; color: #374151;">${isArabic ? 'التاريخ والوقت:' : 'Date & Time:'}</td>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">${isArabic ? 'التاريخ والوقت (توقيت الرياض):' : 'Date & Time (Riyadh Time):'}</td>
               <td style="padding: 8px 0; color: #6b7280;">${appointmentDate}</td>
             </tr>
             <tr>
@@ -351,12 +426,10 @@ async function sendAppointmentConfirmation(appointment: any, language: string) {
 }
 
 async function scheduleReminders(appointment: any) {
-  // This would integrate with a job queue system like Bull or Agenda
-  // For now, we'll store reminder times in the database
   const reminders = [
-    { time: new Date(appointment.scheduledAt.getTime() - 24 * 60 * 60 * 1000), type: '24_HOUR' }, // 24 hours
-    { time: new Date(appointment.scheduledAt.getTime() - 2 * 60 * 60 * 1000), type: '2_HOUR' },     // 2 hours
-    { time: new Date(appointment.scheduledAt.getTime() - 15 * 60 * 1000), type: '15_MINUTE' }       // 15 minutes
+    { time: new Date(appointment.scheduledAt.getTime() - 24 * 60 * 60 * 1000), type: '24_HOUR' },
+    { time: new Date(appointment.scheduledAt.getTime() - 2 * 60 * 60 * 1000), type: '2_HOUR' },
+    { time: new Date(appointment.scheduledAt.getTime() - 15 * 60 * 1000), type: '15_MINUTE' }
   ]
 
   for (const reminder of reminders) {

@@ -28,9 +28,11 @@ interface BookingFormData {
   selectedTime: string
   duration: number
   notes: string
-  language: 'ENGLISH' | 'ARABIC'
+  language: 'english' | 'arabic'
   clinicianId?: string
 }
+
+
 
 export default function AppointmentBooking({ 
   language = 'english', 
@@ -52,7 +54,7 @@ export default function AppointmentBooking({
     selectedTime: '',
     duration: 30,
     notes: '',
-    language: language === 'arabic' ? 'ARABIC' : 'ENGLISH'
+    language: language === 'arabic' ? 'english' : 'arabic' 
   })
 
   const isArabic = language === 'arabic'
@@ -125,7 +127,10 @@ export default function AppointmentBooking({
 
     setLoading(true)
     try {
-      const appointmentDateTime = new Date(`${formData.selectedDate}T${formData.selectedTime}`)
+      // Format: YYYY-MM-DDTHH:mm:ss
+    const dateTimeString = `${formData.selectedDate}T${formData.selectedTime}:00`
+    
+    console.log('📤 Sending appointment time:', dateTimeString)
       
       const response = await fetch('/api/appointments', {
         method: 'POST',
@@ -135,10 +140,10 @@ export default function AppointmentBooking({
           patientEmail: formData.patientEmail,
           patientPhone: formData.patientPhone,
           type: formData.appointmentType,
-          scheduledAt: appointmentDateTime.toISOString(),
+          scheduledAt: dateTimeString.toString,
           duration: formData.duration,
           notes: formData.notes,
-          language: formData.language,
+          language: formData.language.toUpperCase(), // Convert to uppercase here,
           assessmentId
         })
       })

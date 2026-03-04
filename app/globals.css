@@ -2,8 +2,16 @@
 @tailwind base;
 @tailwind utilities;
 @tailwind components;
-/* Import Arabic fonts */
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap');
+
+/* ─────────────────────────────────────────────────────────────
+   FONTS
+   Removed: @import url(Google Fonts) for Cairo + Tajawal
+   Reason:  next/font in layout.tsx already self-hosts
+            Baloo Bhajaan 2 at build time. Having a second
+            @import causes a duplicate request and can cause
+            Flash of Unstyled Text (FOUT).
+   ───────────────────────────────────────────────────────────── */
+
 /* === THEME COLORS === */
 :root {
   --theme-red: #e76c8d;
@@ -14,7 +22,11 @@
 
 body {
   @apply bg-white text-gray-900;
-  font-family: 'Cairo', Arial, sans-serif;
+  /* ── font-family removed from here ──────────────────────────
+     The body already has class="font-baloo" set in layout.tsx.
+     Defining font-family here again would override Tailwind's
+     utility class and could break the font on some browsers.
+     ─────────────────────────────────────────────────────────── */
 }
 
 /* Use the theme colors in Tailwind custom utilities */
@@ -46,17 +58,19 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-
-
-/* Scrollbar styles, forms, etc. remain unchanged */
-
-/* Arabic font classes */
+/* ─────────────────────────────────────────────────────────────
+   Arabic font class — kept for backward compatibility.
+   Now resolves to Baloo Bhajaan 2 via Tailwind config.
+   The letter-spacing:0 rule is still correct for Arabic.
+   ───────────────────────────────────────────────────────────── */
 .font-arabic {
-  font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, sans-serif;
   letter-spacing: 0;
+  /* font-family intentionally removed — resolved via Tailwind */
 }
 
-/* RTL Support */
+/* RTL / LTR Support
+   MainLayout.tsx already sets dir and lang on <html> dynamically.
+   These classes are available for per-element overrides if needed. */
 .rtl {
   direction: rtl;
 }
@@ -105,8 +119,8 @@ body {
   animation-name: slide-in-from-top;
 }
 
-/* Better Arabic text rendering */
-.font-arabic * {
+/* Better text rendering for Arabic — applies to all text now */
+* {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

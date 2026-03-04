@@ -1,22 +1,23 @@
-// app/layout.tsx - Updated root layout
+// app/layout.tsx
 import type { Metadata } from 'next'
-import { Inter, Cairo } from 'next/font/google'
+import { Baloo_Bhaijaan_2 } from 'next/font/google'
 import { getServerSession } from "next-auth/next"
 import { authOptions } from '@/lib/auth'
 import SessionProvider from '@/components/SessionProvider'
 import MainLayout from '@/components/MainLayout'
 import './globals.css'
 
-const inter = Inter({ 
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap'
-})
-
-const cairo = Cairo({ 
-  subsets: ['arabic'],
-  variable: '--font-cairo',
-  display: 'swap'
+// ─────────────────────────────────────────────────────────────
+// Baloo Bhajaan 2 supports BOTH Latin (English) AND Arabic
+// in a single font — no need for two separate fonts anymore.
+// next/font downloads and self-hosts it automatically at build
+// time. No manual download or copy required.
+// ─────────────────────────────────────────────────────────────
+const balooBhajaan = Baloo_Bhaijaan_2({
+  subsets: ['latin', 'arabic'],      // loads both scripts
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-baloo',          // CSS variable used by Tailwind
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -39,12 +40,15 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions)
 
   return (
-    <html lang="en" className={`${inter.variable} ${cairo.variable}`}>
+    // balooBhajaan.variable  → injects --font-baloo CSS variable onto <html>
+    // MainLayout handles dir="rtl/ltr" and lang="ar/en" dynamically
+    <html lang="en" className={balooBhajaan.variable}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </head>
-      <body className={`${inter.className} antialiased`}>
+      {/* font-baloo applies Baloo Bhajaan 2 globally via Tailwind */}
+      <body className="font-baloo antialiased">
         <SessionProvider session={session}>
           <MainLayout>
             {children}
