@@ -122,7 +122,7 @@ console.log("the user role is "+userData?.role);
           </div>
           <div>
             <h1 className={`text-xl font-bold bg-gradient-to-r from-[#E76A6A] to-[#85C3E0] bg-clip-text text-transparent ${isArabic ? 'font-arabic' : ''}`}>
-              {isArabic ? 'لطنسا للصحة' : 'LaTnsa'}
+              {isArabic ? 'لا تنسى للصحة' : 'LaTnsa'}
             </h1>
             <p className={`text-xs text-gray-600 -mt-0.5 ${isArabic ? 'font-arabic' : ''}`}>
               {isArabic ? 'نحن معك.. حتى لاتنسى' : 'With you… so you never forget'}
