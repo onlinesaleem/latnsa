@@ -1,19 +1,11 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 import {
-  Brain,
-  Heart,
-  Shield,
-  CheckCircle,
-  Target,
-  Eye,
-  Sparkles,
-  Clock,
-  Award,
-  Users,
-  Lock
+  Brain, Heart, Shield, CheckCircle,
+  Target, Eye, Clock, Users, Lock, ArrowRight
 } from 'lucide-react'
 import { useLanguage } from '@/components/MainLayout'
 
@@ -24,182 +16,245 @@ export default function AboutPage() {
   const whatSetsUsApart = [
     {
       icon: Brain,
-      titleEn: 'Advanced Memory & Cognitive Assessments',
-      titleAr: 'تقييمات اضطرابات الذاكرة المتقدمة',
-      descEn: 'Based on scientific principles',
-      descAr: 'مبنية على أسس علمية'
+      titleEn: 'Advanced Memory Assessments',
+      titleAr: 'تقييمات متقدمة للذاكرة',
+      descEn: 'Clinically validated tools built on the latest cognitive science research.',
+      descAr: 'أدوات معتمدة طبياً مبنية على أحدث أبحاث علم الإدراك.',
     },
     {
       icon: Users,
-      titleEn: 'Expert Clinical Consultations',
-      titleAr: 'استشارات مع خبراء متخصصين',
-      descEn: 'Specialized healthcare professionals',
-      descAr: 'متخصصون في الرعاية الصحية'
+      titleEn: 'Expert Saudi Consultants',
+      titleAr: 'استشاريون سعوديون متخصصون',
+      descEn: 'Specialists who understand your culture, language, and family dynamics.',
+      descAr: 'متخصصون يفهمون ثقافتك ولغتك وديناميكيات عائلتك.',
     },
     {
       icon: Shield,
-      titleEn: 'Secure & Private Digital Care',
-      titleAr: 'رعاية رقمية آمنة وسرية',
-      descEn: 'Protected health information',
-      descAr: 'حماية المعلومات الصحية'
+      titleEn: 'Secure & Confidential',
+      titleAr: 'آمن وسري تماماً',
+      descEn: 'Your health information is protected with the highest privacy standards.',
+      descAr: 'معلوماتك الصحية محمية بأعلى معايير الخصوصية.',
     },
     {
       icon: Clock,
-      titleEn: 'Fast, Convenient Assessments',
-      titleAr: 'تقييم سريع ومريح',
-      descEn: 'Complete from the comfort of home',
-      descAr: 'من راحة المنزل'
-    }
+      titleEn: 'Care From Home',
+      titleAr: 'رعاية من المنزل',
+      descEn: 'Flexible virtual appointments that fit your family\'s schedule.',
+      descAr: 'مواعيد افتراضية مرنة تناسب جدول عائلتك.',
+    },
   ]
 
   const values = [
     {
       icon: CheckCircle,
+      color: '#A31755',
+      bgColor: '#F9EEF3',
       titleEn: 'Accuracy',
       titleAr: 'الدقة',
-      descEn: 'Providing reliable medical insights.',
-      descAr: 'تقديم معلومات ورؤى طبية موثوقة.'
+      descEn: 'Every insight we provide is grounded in rigorous medical evidence.',
+      descAr: 'كل رؤية نقدمها مبنية على أدلة طبية صارمة.',
     },
     {
       icon: Heart,
+      color: '#2B4DA8',
+      bgColor: '#EBF0FB',
       titleEn: 'Compassion',
       titleAr: 'التعاطف',
-      descEn: 'Care that understands patients and families.',
-      descAr: 'رعاية إنسانية تراعي احتياجات المرضى وعائلاتهم.'
+      descEn: 'We begin every relationship by listening — before we ever diagnose.',
+      descAr: 'نبدأ كل علاقة بالاستماع — قبل أي تشخيص.',
     },
     {
       icon: Lock,
+      color: '#2E9E4F',
+      bgColor: '#E8F5EE',
       titleEn: 'Trust',
       titleAr: 'الثقة',
-      descEn: 'Protecting privacy with transparency.',
-      descAr: 'حماية الخصوصية والبيانات بأعلى درجات الشفافية.'
-    }
+      descEn: 'Complete transparency and privacy at every step of your journey.',
+      descAr: 'شفافية تامة وخصوصية كاملة في كل خطوة من رحلتك.',
+    },
   ]
 
   return (
-    <div className={`min-h-screen ${isArabic ? 'rtl' : 'ltr'} bg-gradient-to-b from-gray-50 to-white`}>
-      
-      {/* Hero Section with Logo */}
-      <section className="relative py-20 bg-gradient-to-br from-[#E6F0FF] via-[#F5F3FF] to-[#FFF5F7]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex justify-center mb-8">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#E76A6A] to-[#85C3E0] rounded-2xl blur-xl opacity-20"></div>
-                <Image
-                  src="/logo.jpeg"
-                  alt="Latnsa Health Logo"
-                  className="relative rounded-2xl shadow-2xl"
-                  width={100}
-                  height={100}
-                  priority={true}
-                />
+    <div className={`min-h-screen bg-white ${isArabic ? 'rtl' : 'ltr'}`}>
+
+      {/* ── Google Fonts ── */}
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+        .font-body    { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        .anim-1 { animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.05s both; }
+        .anim-2 { animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
+        .anim-3 { animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.25s both; }
+        .anim-4 { animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.35s both; }
+
+        .card-lift {
+          transition: transform 0.3s cubic-bezier(0.16,1,0.3,1),
+                      box-shadow 0.3s cubic-bezier(0.16,1,0.3,1),
+                      border-color 0.3s ease;
+        }
+        .card-lift:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 32px rgba(163,23,85,0.10);
+          border-color: rgba(163,23,85,0.2) !important;
+        }
+
+        .icon-ring {
+          transition: background 0.3s ease, transform 0.3s ease;
+        }
+        .card-lift:hover .icon-ring {
+          background: #A31755 !important;
+          transform: scale(1.08);
+        }
+        .card-lift:hover .icon-ring svg {
+          color: white !important;
+        }
+      `}</style>
+
+      {/* ══════════════════════════════════════
+          HERO
+      ══════════════════════════════════════ */}
+      <section className="relative bg-[#F7F2F4] overflow-hidden font-body">
+        {/* Subtle dot grid */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(163,23,85,0.07) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+        {/* Soft bleed */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-[#A31755]/[0.05] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+
+          {/* Logo badge */}
+          <div className="anim-1 flex justify-center mb-10">
+            <div className="bg-white rounded-2xl px-8 py-5 shadow-[0_2px_20px_rgba(163,23,85,0.12)] border border-[#A31755]/10 inline-flex items-center justify-center">
+              <div className="relative w-[140px] h-[56px]">
+                <Image src="/logo.png" alt="LaTnsa" fill className="object-contain" priority />
               </div>
             </div>
+          </div>
 
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              {isArabic ? 'عن لا تنسى' : 'About Latnsa'}
+          <div className="anim-2">
+            <span className={`inline-block bg-[#A31755]/10 text-[#A31755] text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6 font-body ${isArabic ? 'font-arabic' : ''}`}>
+              {isArabic ? 'من نحن' : 'About Us'}
+            </span>
+            <h1 className={`font-display text-[44px] lg:text-[58px] text-gray-900 leading-[1.1] mb-6 ${isArabic ? 'font-arabic text-4xl lg:text-5xl' : ''}`}>
+              {isArabic ? 'عن لا تنسى' : (
+                <>
+                  Redefining memory care<br />
+                  <span className="italic text-[#A31755]">with humanity first</span>
+                </>
+              )}
             </h1>
-            
-            <div className="max-w-4xl mx-auto">
-              <p className="text-xl text-gray-700 leading-relaxed mb-6">
-                {isArabic
-                  ? 'لا تنسى هي منصة صحية رقمية متخصصة في دعم الأفراد الذين يواجهون اضطرابات في الذاكرة والإدراك.'
-                  : 'Latnsa is a digital health platform dedicated to supporting individuals experiencing memory and cognitive changes.'
-                }
-              </p>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                {isArabic
-                  ? 'نقدم تقييمات متقدمة واستشارات طبية متخصصة تساعد العائلات على فهم الحالة واتخاذ الخطوات الصحيحة في الوقت المناسب.'
-                  : 'Through advanced assessments, expert consultations, and compassionate care, we help families understand cognitive health and take the right steps at the right time.'
-                }
-              </p>
-            </div>
+          </div>
+
+          <div className={`anim-3 max-w-2xl mx-auto space-y-4 ${isArabic ? 'font-arabic' : 'font-body'}`}>
+            <p className="text-[17px] text-gray-700 leading-relaxed">
+              {isArabic
+                ? 'لا تنسى هي منصة صحية رقمية متخصصة في دعم الأفراد الذين يواجهون اضطرابات في الذاكرة والإدراك.'
+                : 'LaTnsa is a digital health platform dedicated to supporting individuals experiencing memory and cognitive changes — and the families who love them.'}
+            </p>
+            <p className="text-[15px] text-gray-500 leading-relaxed">
+              {isArabic
+                ? 'نقدم تقييمات متقدمة واستشارات طبية متخصصة تساعد العائلات على فهم الحالة واتخاذ الخطوات الصحيحة في الوقت المناسب.'
+                : 'Through advanced assessments, expert consultations, and compassionate care, we help families understand cognitive health and take the right steps at the right time.'}
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Vision & Mission Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            
+      {/* ══════════════════════════════════════
+          VISION & MISSION
+      ══════════════════════════════════════ */}
+      <section className="py-24 bg-white font-body">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
             {/* Vision */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#E76A6A]/5 to-[#85C3E0]/5 rounded-3xl transform group-hover:scale-105 transition-transform duration-300"></div>
-              <div className="relative bg-white rounded-3xl shadow-xl p-8 md:p-10 border border-gray-100">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 bg-gradient-to-br from-[#E76A6A] to-[#85C3E0] rounded-2xl flex items-center justify-center">
-                    <Eye className="w-7 h-7 text-white" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900">
-                    {isArabic ? 'الرؤية' : 'Vision'}
-                  </h2>
-                </div>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  {isArabic
-                    ? 'أن نكون جهة رائدة وموثوقة في صحة أمراض الذاكرة والإدراك، تساهم في الكشف المبكر وتحسين جودة الحياة.'
-                    : 'To become a trusted leader in memory and cognitive health, enabling earlier detection and better quality of life.'
-                  }
-                </p>
+            <div className="card-lift group bg-[#F9EEF3] border border-[#A31755]/10 rounded-3xl p-10 lg:p-12">
+              <div className="icon-ring w-14 h-14 bg-[#A31755] rounded-2xl flex items-center justify-center mb-8">
+                <Eye className="w-6 h-6 text-white" />
               </div>
+              <div className={`text-xs font-semibold tracking-widest uppercase text-[#A31755]/60 mb-3 ${isArabic ? 'font-arabic' : ''}`}>
+                {isArabic ? 'الرؤية' : 'Vision'}
+              </div>
+              <h2 className={`font-display text-3xl lg:text-4xl text-gray-900 leading-snug mb-5 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
+                {isArabic
+                  ? 'أن نكون جهة رائدة وموثوقة في صحة الذاكرة'
+                  : <>The trusted leader<br />in memory health</>}
+              </h2>
+              <p className={`text-[15px] text-gray-600 leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
+                {isArabic
+                  ? 'أن نكون جهة رائدة وموثوقة في صحة أمراض الذاكرة والإدراك، تساهم في الكشف المبكر وتحسين جودة الحياة.'
+                  : 'To become a trusted leader in memory and cognitive health, enabling earlier detection, better outcomes, and improved quality of life across the Kingdom and beyond.'}
+              </p>
             </div>
 
             {/* Mission */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#85C3E0]/5 to-[#E76A6A]/5 rounded-3xl transform group-hover:scale-105 transition-transform duration-300"></div>
-              <div className="relative bg-white rounded-3xl shadow-xl p-8 md:p-10 border border-gray-100">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 bg-gradient-to-br from-[#85C3E0] to-[#E76A6A] rounded-2xl flex items-center justify-center">
-                    <Target className="w-7 h-7 text-white" />
-                  </div>
-                  <h2 className="text-3xl font-bold text-gray-900">
-                    {isArabic ? 'الرسالة' : 'Mission'}
-                  </h2>
-                </div>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  {isArabic
-                    ? 'توفير تقييم اضطرابات الذاكرة بشكل متقدم وسهل الوصول عبر التكنولوجيا الحديثة والخبرة الطبية، لدعم المرضى وعائلاتهم في كل خطوة.'
-                    : 'To make memory and cognitive assessment accessible through innovative technology, expert care, and compassionate support for patients and families.'
-                  }
-                </p>
+            <div className="card-lift group bg-[#EBF0FB] border border-[#2B4DA8]/10 rounded-3xl p-10 lg:p-12"
+              style={{ '--hover-color': '#2B4DA8' } as React.CSSProperties}
+            >
+              <div className="w-14 h-14 bg-[#2B4DA8] rounded-2xl flex items-center justify-center mb-8 transition-transform duration-300 group-hover:scale-110">
+                <Target className="w-6 h-6 text-white" />
               </div>
+              <div className={`text-xs font-semibold tracking-widest uppercase text-[#2B4DA8]/60 mb-3 ${isArabic ? 'font-arabic' : ''}`}>
+                {isArabic ? 'الرسالة' : 'Mission'}
+              </div>
+              <h2 className={`font-display text-3xl lg:text-4xl text-gray-900 leading-snug mb-5 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
+                {isArabic
+                  ? 'رعاية في متناول كل عائلة'
+                  : <>Care that reaches<br />every family</>}
+              </h2>
+              <p className={`text-[15px] text-gray-600 leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
+                {isArabic
+                  ? 'توفير تقييم اضطرابات الذاكرة بشكل متقدم وسهل الوصول عبر التكنولوجيا الحديثة والخبرة الطبية، لدعم المرضى وعائلاتهم في كل خطوة.'
+                  : 'To make memory and cognitive assessment accessible through innovative technology, expert medical care, and compassionate human support — for every patient and every family.'}
+              </p>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* What Sets Us Apart */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* ══════════════════════════════════════
+          WHAT SETS US APART
+      ══════════════════════════════════════ */}
+      <section className="py-24 bg-gray-50 font-body">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#E76A6A]/10 to-[#85C3E0]/10 rounded-full mb-4">
-              <Sparkles className="w-5 h-5 text-[#E76A6A]" />
-              <span className="text-sm font-medium text-gray-700">
-                {isArabic ? 'ما يميزنا' : 'What Sets Us Apart'}
-              </span>
-            </div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              {isArabic ? 'ما الذي يميزنا' : 'What Sets Us Apart'}
+            <span className={`inline-block bg-[#A31755]/10 text-[#A31755] text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-5 ${isArabic ? 'font-arabic' : ''}`}>
+              {isArabic ? 'ما يميزنا' : 'What Sets Us Apart'}
+            </span>
+            <h2 className={`font-display text-3xl lg:text-[42px] text-gray-900 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
+              {isArabic ? 'ما الذي يميزنا' : 'Why families choose LaTnsa'}
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {whatSetsUsApart.map((item, index) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {whatSetsUsApart.map((item, i) => {
               const Icon = item.icon
               return (
-                <div 
-                  key={index}
-                  className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:border-[#85C3E0]/40 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                <div
+                  key={i}
+                  className="card-lift group bg-white rounded-2xl p-7 border border-gray-100"
                 >
-                  <div className="w-14 h-14 bg-gradient-to-br from-[#E76A6A]/10 to-[#85C3E0]/10 rounded-xl flex items-center justify-center mb-4 group-hover:from-[#E76A6A]/20 group-hover:to-[#85C3E0]/20 transition-colors">
-                    <Icon className="w-7 h-7 text-[#E76A6A]" />
+                  <div className="icon-ring w-12 h-12 bg-[#F9EEF3] rounded-xl flex items-center justify-center mb-5">
+                    <Icon className="w-5 h-5 text-[#A31755]" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className={`text-[15px] font-semibold text-gray-900 mb-2 leading-snug ${isArabic ? 'font-arabic' : ''}`}>
                     {isArabic ? item.titleAr : item.titleEn}
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
+                  <p className={`text-[13.5px] text-gray-500 leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
                     {isArabic ? item.descAr : item.descEn}
                   </p>
                 </div>
@@ -209,45 +264,52 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Our Values */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* ══════════════════════════════════════
+          VALUES — Full-width editorial strip
+      ══════════════════════════════════════ */}
+      <section className="py-24 bg-white font-body">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              {isArabic ? 'قيمنا' : 'Our Values'}
+            <h2 className={`font-display text-3xl lg:text-[42px] text-gray-900 mb-4 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
+              {isArabic ? 'قيمنا' : 'Our values'}
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className={`text-[16px] text-gray-500 max-w-xl mx-auto ${isArabic ? 'font-arabic' : ''}`}>
               {isArabic
                 ? 'القيم التي توجه عملنا وتحدد التزامنا تجاه مرضانا'
-                : 'The values that guide our work and define our commitment to patients'
-              }
+                : 'The principles that shape every interaction, every assessment, every moment of care.'}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {values.map((value, index) => {
-              const Icon = value.icon
-              const colorClasses = [
-                { bg: 'bg-green-50', icon: 'text-green-600', border: 'border-green-100' },
-                { bg: 'bg-blue-50', icon: 'text-blue-600', border: 'border-blue-100' },
-                { bg: 'bg-purple-50', icon: 'text-purple-600', border: 'border-purple-100' }
-              ]
-              const colors = colorClasses[index]
-
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {values.map((v, i) => {
+              const Icon = v.icon
               return (
-                <div 
-                  key={index}
-                  className={`bg-white rounded-2xl p-8 border ${colors.border} hover:shadow-xl transition-all duration-300`}
+                <div
+                  key={i}
+                  className="card-lift group relative bg-white rounded-3xl p-10 border border-gray-100 text-center overflow-hidden"
                 >
-                  <div className={`w-16 h-16 ${colors.bg} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-                    <Icon className={`w-8 h-8 ${colors.icon}`} />
+                  {/* Soft tinted corner blob */}
+                  <div
+                    className="absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-30"
+                    style={{ background: v.bgColor }}
+                  />
+                  <div
+                    className="icon-ring w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 transition-all duration-300"
+                    style={{ background: v.bgColor }}
+                  >
+                    <Icon className="w-7 h-7 transition-colors duration-300" style={{ color: v.color }} />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 text-center mb-3">
-                    {isArabic ? value.titleAr : value.titleEn}
+                  <h3 className={`font-display text-2xl text-gray-900 mb-3 ${isArabic ? 'font-arabic' : ''}`}>
+                    {isArabic ? v.titleAr : v.titleEn}
                   </h3>
-                  <p className="text-gray-600 text-center leading-relaxed">
-                    {isArabic ? value.descAr : value.descEn}
+                  <p className={`text-[14.5px] text-gray-500 leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
+                    {isArabic ? v.descAr : v.descEn}
                   </p>
+                  {/* Bottom accent line */}
+                  <div
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-[3px] rounded-full transition-all duration-300 group-hover:w-24"
+                    style={{ background: v.color }}
+                  />
                 </div>
               )
             })}
@@ -255,27 +317,34 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-16 bg-gradient-to-r from-[#E76A6A] to-[#85C3E0]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
-            {isArabic ? 'ابدأ رحلتك معنا اليوم' : 'Start Your Journey With Us Today'}
+      {/* ══════════════════════════════════════
+          CTA
+      ══════════════════════════════════════ */}
+      <section className="relative bg-[#A31755] py-24 overflow-hidden font-body">
+        {/* Rings */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full border border-white/[0.05]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] rounded-full border border-white/[0.07]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] rounded-full border border-white/[0.10]" />
+        </div>
+        <div className="relative max-w-3xl mx-auto px-4 text-center">
+          <h2 className={`font-display text-4xl lg:text-5xl text-white mb-5 ${isArabic ? 'font-arabic text-3xl lg:text-4xl' : ''}`}>
+            {isArabic ? 'ابدأ رحلتك معنا اليوم' : <>Start your journey<br />with us today</>}
           </h2>
-          <p className="text-xl text-white/90 mb-8">
+          <p className={`text-white/70 text-[16px] mb-10 max-w-xl mx-auto leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
             {isArabic
-              ? 'نحن هنا لدعمك ودعم عائلتك في كل خطوة'
-              : 'We are here to support you and your family every step of the way'
-            }
+              ? 'نحن هنا لدعمك ودعم عائلتك في كل خطوة من هذه الرحلة.'
+              : "We are here to support you and your family at every step — from the very first question to the clearest care plan."}
           </p>
-          <a
+          <Link
             href="/auth/register"
-            className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-[#E76A6A] bg-white rounded-xl hover:bg-gray-50 transform hover:scale-105 transition-all duration-200 shadow-lg"
+            className={`inline-flex items-center gap-3 px-9 py-4 bg-white text-[#A31755] font-bold text-[15px] rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-xl ${isArabic ? 'font-arabic' : ''}`}
           >
             {isArabic ? 'ابدأ التقييم الآن' : 'Start Assessment Now'}
-          </a>
+            <ArrowRight className={`w-4 h-4 ${isArabic ? 'rotate-180' : ''}`} />
+          </Link>
         </div>
       </section>
-
     </div>
   )
 }
