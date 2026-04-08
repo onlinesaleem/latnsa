@@ -56,8 +56,8 @@ export default function AboutPage() {
     },
     {
       icon: Heart,
-      color: '#2B4DA8',
-      bgColor: '#EBF0FB',
+      color: '#405EAA',
+      bgColor: '#EAF0FF',
       titleEn: 'Compassion',
       titleAr: 'التعاطف',
       descEn: 'We begin every relationship by listening — before we ever diagnose.',
@@ -65,7 +65,7 @@ export default function AboutPage() {
     },
     {
       icon: Lock,
-      color: '#2E9E4F',
+      color: '#A8D163',
       bgColor: '#E8F5EE',
       titleEn: 'Trust',
       titleAr: 'الثقة',
@@ -79,8 +79,8 @@ export default function AboutPage() {
 
       {/* ── Google Fonts ── */}
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        . { font-family: 'Baloo Bhaijaan 2', system-ui, sans-serif; }
         .font-body    { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
 
         @keyframes fadeUp {
@@ -122,7 +122,7 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════
           HERO
       ══════════════════════════════════════ */}
-      <section className="relative bg-[#F7F2F4] overflow-hidden font-body">
+      <section className="relative bg-[#FFFEF9] overflow-hidden font-body">
         {/* Subtle dot grid */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -149,7 +149,7 @@ export default function AboutPage() {
             <span className={`inline-block bg-[#A31755]/10 text-[#A31755] text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6 font-body ${isArabic ? 'font-arabic' : ''}`}>
               {isArabic ? 'من نحن' : 'About Us'}
             </span>
-            <h1 className={`font-display text-[44px] lg:text-[58px] text-gray-900 leading-[1.1] mb-6 ${isArabic ? 'font-arabic text-4xl lg:text-5xl' : ''}`}>
+            <h1 className={` text-[44px] lg:text-[58px] text-gray-900 leading-[1.1] mb-6 ${isArabic ? 'font-arabic text-4xl lg:text-5xl' : ''}`}>
               {isArabic ? 'عن لا تنسى' : (
                 <>
                   Redefining memory care<br />
@@ -189,7 +189,7 @@ export default function AboutPage() {
               <div className={`text-xs font-semibold tracking-widest uppercase text-[#A31755]/60 mb-3 ${isArabic ? 'font-arabic' : ''}`}>
                 {isArabic ? 'الرؤية' : 'Vision'}
               </div>
-              <h2 className={`font-display text-3xl lg:text-4xl text-gray-900 leading-snug mb-5 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
+              <h2 className={` text-3xl lg:text-4xl text-gray-900 leading-snug mb-5 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
                 {isArabic
                   ? 'أن نكون جهة رائدة وموثوقة في صحة الذاكرة'
                   : <>The trusted leader<br />in memory health</>}
@@ -202,16 +202,16 @@ export default function AboutPage() {
             </div>
 
             {/* Mission */}
-            <div className="card-lift group bg-[#EBF0FB] border border-[#2B4DA8]/10 rounded-3xl p-10 lg:p-12"
-              style={{ '--hover-color': '#2B4DA8' } as React.CSSProperties}
+            <div className="card-lift group bg-[#EAF0FF] border border-[#405EAA]/10 rounded-3xl p-10 lg:p-12"
+              style={{ '--hover-color': '#405EAA' } as React.CSSProperties}
             >
-              <div className="w-14 h-14 bg-[#2B4DA8] rounded-2xl flex items-center justify-center mb-8 transition-transform duration-300 group-hover:scale-110">
+              <div className="w-14 h-14 bg-[#405EAA] rounded-2xl flex items-center justify-center mb-8 transition-transform duration-300 group-hover:scale-110">
                 <Target className="w-6 h-6 text-white" />
               </div>
-              <div className={`text-xs font-semibold tracking-widest uppercase text-[#2B4DA8]/60 mb-3 ${isArabic ? 'font-arabic' : ''}`}>
+              <div className={`text-xs font-semibold tracking-widest uppercase text-[#405EAA]/60 mb-3 ${isArabic ? 'font-arabic' : ''}`}>
                 {isArabic ? 'الرسالة' : 'Mission'}
               </div>
-              <h2 className={`font-display text-3xl lg:text-4xl text-gray-900 leading-snug mb-5 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
+              <h2 className={` text-3xl lg:text-4xl text-gray-900 leading-snug mb-5 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
                 {isArabic
                   ? 'رعاية في متناول كل عائلة'
                   : <>Care that reaches<br />every family</>}
@@ -235,7 +235,7 @@ export default function AboutPage() {
             <span className={`inline-block bg-[#A31755]/10 text-[#A31755] text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-5 ${isArabic ? 'font-arabic' : ''}`}>
               {isArabic ? 'ما يميزنا' : 'What Sets Us Apart'}
             </span>
-            <h2 className={`font-display text-3xl lg:text-[42px] text-gray-900 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
+            <h2 className={` text-3xl lg:text-[42px] text-gray-900 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
               {isArabic ? 'ما الذي يميزنا' : 'Why families choose LaTnsa'}
             </h2>
           </div>
@@ -270,7 +270,7 @@ export default function AboutPage() {
       <section className="py-24 bg-white font-body">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className={`font-display text-3xl lg:text-[42px] text-gray-900 mb-4 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
+            <h2 className={` text-3xl lg:text-[42px] text-gray-900 mb-4 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
               {isArabic ? 'قيمنا' : 'Our values'}
             </h2>
             <p className={`text-[16px] text-gray-500 max-w-xl mx-auto ${isArabic ? 'font-arabic' : ''}`}>
@@ -299,7 +299,7 @@ export default function AboutPage() {
                   >
                     <Icon className="w-7 h-7 transition-colors duration-300" style={{ color: v.color }} />
                   </div>
-                  <h3 className={`font-display text-2xl text-gray-900 mb-3 ${isArabic ? 'font-arabic' : ''}`}>
+                  <h3 className={` text-2xl text-gray-900 mb-3 ${isArabic ? 'font-arabic' : ''}`}>
                     {isArabic ? v.titleAr : v.titleEn}
                   </h3>
                   <p className={`text-[14.5px] text-gray-500 leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
@@ -320,7 +320,7 @@ export default function AboutPage() {
       {/* ══════════════════════════════════════
           CTA
       ══════════════════════════════════════ */}
-      <section className="relative bg-[#A31755] py-24 overflow-hidden font-body">
+      <section className="relative py-24 overflow-hidden font-body">
         {/* Rings */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full border border-white/[0.05]" />
@@ -328,7 +328,7 @@ export default function AboutPage() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] rounded-full border border-white/[0.10]" />
         </div>
         <div className="relative max-w-3xl mx-auto px-4 text-center">
-          <h2 className={`font-display text-4xl lg:text-5xl text-white mb-5 ${isArabic ? 'font-arabic text-3xl lg:text-4xl' : ''}`}>
+          <h2 className={` text-4xl lg:text-5xl text-white mb-5 ${isArabic ? 'font-arabic text-3xl lg:text-4xl' : ''}`}>
             {isArabic ? 'ابدأ رحلتك معنا اليوم' : <>Start your journey<br />with us today</>}
           </h2>
           <p className={`text-white/70 text-[16px] mb-10 max-w-xl mx-auto leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>

@@ -22,18 +22,19 @@ export default function SplashScreen({ onComplete, language = 'english' }: Splas
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
-      background: '#A31755',
+      background: 'linear-gradient(135deg, #A31755 0%, #405EAA 100%)',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       transition: 'opacity 0.75s cubic-bezier(0.4,0,0.2,1)',
       opacity: phase === 'out' ? 0 : 1,
       pointerEvents: phase === 'out' ? 'none' : 'auto',
+      fontFamily: "'Baloo Bhaijaan 2', system-ui, sans-serif",
     }}>
       {/* Grain */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
-        backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E\")",
-        opacity: 0.6, mixBlendMode: 'overlay',
+        backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E\")",
+        opacity: 0.55, mixBlendMode: 'overlay',
       }} />
       {/* Rings */}
       {[640, 440, 270].map((s, i) => (
@@ -44,31 +45,57 @@ export default function SplashScreen({ onComplete, language = 'english' }: Splas
         }} />
       ))}
 
-      <div style={{ position: 'relative', zIndex: 2, animation: 'sReveal 0.85s cubic-bezier(0.16,1,0.3,1) 0.1s both', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 30 }}>
-        <div style={{ background: 'white', borderRadius: 24, padding: '24px 52px', boxShadow: '0 20px 70px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* Logo + tagline */}
+      <div style={{
+        position: 'relative', zIndex: 2,
+        animation: 'sReveal 0.85s cubic-bezier(0.16,1,0.3,1) 0.1s both',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 30,
+      }}>
+        <div style={{
+          background: 'white', borderRadius: 24, padding: '24px 52px',
+          boxShadow: '0 20px 70px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.10)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
           <div style={{ position: 'relative', width: 200, height: 80 }}>
             <Image src="/logo.png" alt="LaTnsa" fill style={{ objectFit: 'contain' }} priority />
           </div>
         </div>
+
         <div style={{ textAlign: 'center', animation: 'sReveal 0.85s cubic-bezier(0.16,1,0.3,1) 0.28s both' }}>
-          <p style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 18, fontStyle: 'italic', color: 'rgba(255,255,255,0.9)', marginBottom: 7, letterSpacing: '0.2px' }}>
+          <p style={{
+            fontFamily: "'Baloo Bhaijaan 2', system-ui, sans-serif",
+            fontSize: 18, fontWeight: 500,
+            color: '#FFFEF9', marginBottom: 7, letterSpacing: '0.2px',
+          }}>
             {isArabic ? 'نحن معك… حتى لا تنسى' : 'With you… so you never forget'}
           </p>
-          <p style={{ fontFamily: "'Instrument Sans',system-ui,sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)' }}>
+          <p style={{
+            fontFamily: "'Baloo Bhaijaan 2', system-ui, sans-serif",
+            fontSize: 11, fontWeight: 600,
+            letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)',
+          }}>
             Memory Assessment System
           </p>
         </div>
       </div>
 
-      <div style={{ position: 'absolute', bottom: 52, zIndex: 2, display: 'flex', gap: 9, alignItems: 'center' }}>
-        {[0,1,2].map(i => (
-          <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(255,255,255,0.5)', animation: `sDot 1.4s ease-in-out ${i*0.22}s infinite` }} />
+      {/* Loading dots */}
+      <div style={{
+        position: 'absolute', bottom: 52, zIndex: 2,
+        display: 'flex', gap: 9, alignItems: 'center',
+      }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{
+            width: 5, height: 5, borderRadius: '50%',
+            background: '#FFFEF9',
+            animation: `sDot 1.4s ease-in-out ${i * 0.22}s infinite`,
+          }} />
         ))}
       </div>
 
       <style jsx>{`
         @keyframes sReveal { from{opacity:0;transform:translateY(20px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-        @keyframes sDot { 0%,80%,100%{opacity:0.25;transform:scale(0.8)} 40%{opacity:1;transform:scale(1.2)} }
+        @keyframes sDot    { 0%,80%,100%{opacity:0.25;transform:scale(0.8)} 40%{opacity:1;transform:scale(1.2)} }
       `}</style>
     </div>
   )

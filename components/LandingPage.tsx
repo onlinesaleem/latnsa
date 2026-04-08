@@ -110,13 +110,13 @@ export default function LandingPage() {
   const slide = slides[current]
 
   return (
-    <div className={`min-h-screen bg-[#FDFAF8] ${isArabic ? 'rtl' : 'ltr'}`}
-      style={{ fontFamily: "'Instrument Sans', system-ui, sans-serif" }}>
+    <div className={`min-h-screen bg-[#FFFEF9] ${isArabic ? 'rtl' : 'ltr'}`}
+      style={{ fontFamily: "'Baloo Bhaijaan 2', system-ui, sans-serif" }}>
 
       {/* ══ GLOBAL STYLES ══ */}
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
-        .font-display { font-family: 'DM Serif Display', Georgia, serif !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&display=swap');
+        .font-display { font-family: 'Baloo Bhaijaan 2', system-ui, sans-serif !important; }
 
         @keyframes fadeUp    { from{opacity:0;transform:translateY(26px)} to{opacity:1;transform:translateY(0)} }
         @keyframes fadeIn    { from{opacity:0} to{opacity:1} }
@@ -156,7 +156,7 @@ export default function LandingPage() {
       `}</style>
 
       {/* ══ HERO ══════════════════════════════════ */}
-      <section className="grain-hero relative bg-[#A31755] overflow-hidden">
+      <section className="grain-hero relative overflow-hidden" style={{ background: "linear-gradient(135deg,#A31755 0%,#405EAA 100%)" }}>
         {/* Blob 1 */}
         <div style={{ position:'absolute', width:520, height:520, borderRadius:'50%', background:'rgba(255,255,255,0.05)', top:-180, right:-160, animation:'blobDrift 12s ease-in-out infinite', pointerEvents:'none' }} />
         {/* Blob 2 */}
@@ -171,7 +171,7 @@ export default function LandingPage() {
 
             {/* Eyebrow */}
             <div className={`anim-up d1 inline-flex items-center gap-2 bg-white/[0.12] border border-white/[0.22] rounded-full px-5 py-2 mb-9 ${isArabic ? 'font-arabic' : ''}`}>
-              <span className="w-2 h-2 bg-[#2E9E4F] rounded-full flex-shrink-0" />
+              <span className="w-2 h-2 bg-[#A8D163] rounded-full flex-shrink-0" />
               <span className="text-white/90 text-[13px] font-medium tracking-tight">{slide.eyebrow}</span>
             </div>
 
@@ -230,11 +230,11 @@ export default function LandingPage() {
       </section>
 
       {/* ── Trust strip ── */}
-      <div className="bg-[#7A1040] py-3.5 border-b border-white/[0.04]">
+      <div className="bg-[#1A1410] py-3.5 border-b border-white/[0.04]">
         <div className="max-w-5xl mx-auto px-5 flex items-center justify-center gap-6 sm:gap-10 flex-wrap">
           {getTrust(isArabic).map((t, i) => (
             <div key={i} className={`flex items-center gap-2 text-white/80 text-[13px] font-medium ${isArabic ? 'font-arabic' : ''}`}>
-              <span className="w-1.5 h-1.5 bg-[#2E9E4F] rounded-full flex-shrink-0" />
+              <span className="w-1.5 h-1.5 bg-[#A8D163] rounded-full flex-shrink-0" />
               {isArabic ? t.ar : t.en}
             </div>
           ))}
@@ -242,12 +242,12 @@ export default function LandingPage() {
       </div>
 
       {/* ══ ABOUT — Split panel ══════════════════ */}
-      <section className="py-24 bg-[#FDFAF8]">
+      <section className="py-24 bg-[#FFFEF9]">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden border border-[#EDE8E3] shadow-[0_4px_40px_rgba(26,20,16,0.06)]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden border border-[#F2F2F2] shadow-[0_4px_40px_rgba(26,20,16,0.06)]">
 
             {/* Left — brand */}
-            <div className="grain-hero relative bg-[#A31755] p-10 lg:p-14 flex flex-col justify-between gap-10 overflow-hidden">
+            <div className="grain-hero relative p-10 lg:p-14 flex flex-col justify-between gap-10 overflow-hidden" style={{ background: "linear-gradient(135deg,#A31755 0%,#405EAA 100%)" }}>
               <div style={{ position:'absolute', width:300, height:300, borderRadius:'50%', background:'rgba(255,255,255,0.05)', bottom:-80, right:-80, pointerEvents:'none' }} />
               <div className="relative z-10">
                 <span className={`inline-block bg-white/[0.15] border border-white/[0.2] text-white/90 text-[11px] font-bold px-3.5 py-1.5 rounded-full uppercase tracking-[1.5px] mb-7 ${isArabic ? 'font-arabic' : ''}`}>
@@ -287,7 +287,7 @@ export default function LandingPage() {
                       <p className={`text-[15px] font-semibold text-[#1A1410] mb-1 ${isArabic ? 'font-arabic' : ''}`}>
                         {isArabic ? step.ar : step.en}
                       </p>
-                      <p className={`text-[13.5px] text-[#8C7E76] leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
+                      <p className={`text-[13.5px] text-[#1A1410] leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
                         {isArabic ? step.bodyAr : step.bodyEn}
                       </p>
                     </div>
@@ -300,7 +300,7 @@ export default function LandingPage() {
       </section>
 
       {/* ══ WHY ══════════════════════════════════ */}
-      <section className="py-24 bg-[#F5F0EC]">
+      <section className="py-24 bg-[#FFFEF9]">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
           <div className="flex flex-col lg:flex-row gap-14 items-start">
             {/* Left sticky title */}
@@ -316,7 +316,7 @@ export default function LandingPage() {
             {/* Right grid */}
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {getWhyItems(isArabic).map((item, i) => (
-                <div key={i} className="card-lift bg-white rounded-2xl p-6 border border-[#EDE8E3] flex gap-4">
+                <div key={i} className="card-lift bg-white rounded-2xl p-6 border border-[#F2F2F2] flex gap-4">
                   <div className="w-8 h-8 flex-shrink-0 rounded-xl bg-[#F9EEF3] flex items-center justify-center">
                     <span className="text-[12px] font-bold text-[#A31755]">{i + 1}</span>
                   </div>
@@ -331,16 +331,16 @@ export default function LandingPage() {
       </section>
 
       {/* ══ SERVICES ═════════════════════════════ */}
-      <section className="py-24 bg-[#FDFAF8]">
+      <section className="py-24 bg-[#FFFEF9]">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
           <div className="text-center mb-14">
-            <span className={`inline-block bg-[#EBF0FB] text-[#2B4DA8] text-[11px] font-bold uppercase tracking-[1.8px] px-3.5 py-1.5 rounded-full mb-5 ${isArabic ? 'font-arabic' : ''}`}>
+            <span className={`inline-block bg-[#EBF0FB] text-[#405EAA] text-[11px] font-bold uppercase tracking-[1.8px] px-3.5 py-1.5 rounded-full mb-5 ${isArabic ? 'font-arabic' : ''}`}>
               {isArabic ? 'خدماتنا' : 'Our Services'}
             </span>
             <h2 className={`font-display text-[34px] lg:text-[42px] text-[#1A1410] mb-3 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
               {isArabic ? 'رعاية متكاملة في كل خطوة' : 'Comprehensive care, every step'}
             </h2>
-            <p className={`text-[16px] text-[#8C7E76] max-w-lg mx-auto ${isArabic ? 'font-arabic' : ''}`}>
+            <p className={`text-[16px] text-[#1A1410] max-w-lg mx-auto ${isArabic ? 'font-arabic' : ''}`}>
               {isArabic
                 ? 'خدمات لدعم مرضى الزهايمر واضطرابات الذاكرة ومقدمي الرعاية'
                 : "Supporting Alzheimer's patients, memory disorder individuals, and their caregivers."}
@@ -348,7 +348,7 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {getServices(isArabic).map(({ Icon, en, ar }, i) => (
-              <div key={i} className="card-lift group bg-white rounded-2xl p-7 border border-[#EDE8E3]">
+              <div key={i} className="card-lift group bg-white rounded-2xl p-7 border border-[#F2F2F2]">
                 <div className="i-ring w-12 h-12 bg-[#F9EEF3] rounded-xl flex items-center justify-center mb-5">
                   <Icon className="w-5 h-5 text-[#A31755]" />
                 </div>
@@ -362,7 +362,7 @@ export default function LandingPage() {
       </section>
 
       {/* ══ TEAM — Full-width editorial ══════════ */}
-      <section className="grain-hero relative bg-[#2B4DA8] py-24 overflow-hidden">
+      <section className="grain-hero relative bg-[#405EAA] py-24 overflow-hidden">
         <div style={{ position:'absolute', width:600, height:600, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.06)', top:'50%', left:'50%', transform:'translate(-50%,-50%)', pointerEvents:'none' }} />
         <div style={{ position:'absolute', width:400, height:400, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.08)', top:'50%', left:'50%', transform:'translate(-50%,-50%)', pointerEvents:'none' }} />
         <div className="relative z-10 max-w-4xl mx-auto px-5 sm:px-8 text-center">
@@ -372,7 +372,7 @@ export default function LandingPage() {
           <h2 className={`font-display text-[34px] lg:text-[48px] text-white mb-5 ${isArabic ? 'font-arabic text-2xl lg:text-4xl' : ''}`}>
             {isArabic ? 'كل استشارة هدفها' : <>Every consultation<br /><span className="italic">aims to</span></>}
           </h2>
-          <p className={`text-white/65 text-[15.5px] mb-12 max-w-2xl mx-auto leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
+          <p className={`text-[#FFFEF9]/80 text-[15.5px] mb-12 max-w-2xl mx-auto leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
             {isArabic
               ? 'فريقنا من استشاريين سعوديين متخصصين يعملون كشركاء حقيقيين للعائلة وليس مجرد مقدمي استشارة.'
               : 'Our team of Saudi consultants specialized in memory disorders work as true partners to the family — not just as advisors.'
@@ -385,7 +385,7 @@ export default function LandingPage() {
               { en: 'Help you make decisions right for you and your loved one',      ar: 'مساعدتكم على اتخاذ القرارات المناسبة' },
             ].map((g, i) => (
               <div key={i} className={`flex items-center gap-3 bg-white/[0.10] border border-white/[0.14] rounded-xl px-5 py-3.5 text-[14px] text-white/90 ${isArabic ? 'font-arabic' : ''}`}>
-                <div className="w-5 h-5 rounded-full bg-[#2E9E4F] flex items-center justify-center flex-shrink-0">
+                <div className="w-5 h-5 rounded-full bg-[#A8D163] flex items-center justify-center flex-shrink-0">
                   <CheckCircle className="w-3 h-3 text-white" />
                 </div>
                 {isArabic ? g.ar : g.en}
@@ -393,7 +393,7 @@ export default function LandingPage() {
             ))}
           </div>
           <Link href="/auth/register"
-            className={`inline-flex items-center gap-2.5 px-9 py-4 bg-white text-[#2B4DA8] font-bold text-[15px] rounded-2xl hover:bg-gray-50 transition-all duration-200 shadow-xl ${isArabic ? 'font-arabic' : ''}`}>
+            className={`inline-flex items-center gap-2.5 px-9 py-4 bg-white text-[#405EAA] font-bold text-[15px] rounded-2xl hover:bg-gray-50 transition-all duration-200 shadow-xl ${isArabic ? 'font-arabic' : ''}`}>
             {isArabic ? 'احجز موعدك عبر التطبيق' : 'Book Your Appointment via the App'}
             <ArrowRight className={`w-4 h-4 ${isArabic ? 'rotate-180' : ''}`} />
           </Link>
@@ -401,7 +401,7 @@ export default function LandingPage() {
       </section>
 
       {/* ══ APP ══════════════════════════════════ */}
-      <section className="py-24 bg-[#140A0E] text-white">
+      <section className="py-24 bg-[#1A1410] text-white">
         <div className="max-w-6xl mx-auto px-5 sm:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
@@ -451,7 +451,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <a href="https://latnsa.com/" target="_blank" rel="noopener noreferrer"
-                className={`flex items-center justify-center gap-3 w-full py-4 bg-white text-[#140A0E] font-bold text-[14.5px] rounded-2xl hover:bg-[#FDFAF8] transition-all duration-200 ${isArabic ? 'font-arabic' : ''}`}>
+                className={`flex items-center justify-center gap-3 w-full py-4 bg-white text-[#1A1410] font-bold text-[14.5px] rounded-2xl hover:bg-[#FFFEF9] transition-all duration-200 ${isArabic ? 'font-arabic' : ''}`}>
                 <Download className="w-5 h-5" />
                 {isArabic ? 'تحميل من App Store' : 'Download on App Store'}
               </a>
@@ -466,7 +466,7 @@ export default function LandingPage() {
       </section>
 
       {/* ══ CTA ══════════════════════════════════ */}
-      <section className="grain-hero relative bg-[#A31755] py-24 overflow-hidden">
+      <section className="grain-hero relative py-24 overflow-hidden" style={{ background: "linear-gradient(135deg,#A31755 0%,#405EAA 100%)" }}>
         {[700, 480, 280].map((s, i) => (
           <div key={i} style={{ position:'absolute', width:s, height:s, borderRadius:'50%', border:`1px solid rgba(255,255,255,${0.04+i*0.025})`, top:'50%', left:'50%', transform:'translate(-50%,-50%)', pointerEvents:'none' }} />
         ))}
@@ -485,8 +485,8 @@ export default function LandingPage() {
           </Link>
           <div className="flex items-center justify-center gap-6 mt-9 flex-wrap">
             {getTrust(isArabic).map((t, i) => (
-              <div key={i} className={`flex items-center gap-2 text-white/65 text-[13px] ${isArabic ? 'font-arabic' : ''}`}>
-                <span className="w-1.5 h-1.5 bg-[#2E9E4F] rounded-full" />
+              <div key={i} className={`flex items-center gap-2 text-[#FFFEF9]/80 text-[13px] ${isArabic ? 'font-arabic' : ''}`}>
+                <span className="w-1.5 h-1.5 bg-[#A8D163] rounded-full" />
                 {isArabic ? t.ar : t.en}
               </div>
             ))}

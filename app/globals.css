@@ -3,268 +3,172 @@
 @tailwind utilities;
 @tailwind components;
 
-/* ─────────────────────────────────────────────────────────────
-   FONTS
-   Removed: @import url(Google Fonts) for Cairo + Tajawal
-   Reason:  next/font in layout.tsx already self-hosts
-            Baloo Bhajaan 2 at build time. Having a second
-            @import causes a duplicate request and can cause
-            Flash of Unstyled Text (FOUT).
-   ───────────────────────────────────────────────────────────── */
+/* ── LaTnsa globals.css — paste into your existing globals.css ── */
 
-/* === THEME COLORS === */
-:root {
-  --theme-red: #e76c8d;
-  --theme-blue: #6abad9;
-  --theme-green: #6bb46b;
-  --theme-gradient: linear-gradient(90deg, var(--theme-red), var(--theme-blue));
-}
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&display=swap');
 
-body {
-  @apply bg-white text-gray-900;
-  /* ── font-family removed from here ──────────────────────────
-     The body already has class="font-baloo" set in layout.tsx.
-     Defining font-family here again would override Tailwind's
-     utility class and could break the font on some browsers.
-     ─────────────────────────────────────────────────────────── */
-}
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Use the theme colors in Tailwind custom utilities */
-.btn-primary {
-  @apply text-white py-2 px-4 rounded-md transition-colors;
-  background: var(--theme-gradient);
-}
-.btn-primary:hover {
-  filter: brightness(1.1);
-}
-
-.btn-secondary {
-  @apply bg-white text-gray-700 py-2 px-4 rounded-md border transition-colors;
-  border-color: var(--theme-blue);
-}
-.btn-secondary:hover {
-  background-color: var(--theme-blue);
-  color: white;
-}
-
-/* Gradient backgrounds using theme colors */
-.bg-theme-gradient {
-  background: var(--theme-gradient);
-}
-
-.text-theme-gradient {
-  background: var(--theme-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Arabic font class — kept for backward compatibility.
-   Now resolves to Baloo Bhajaan 2 via Tailwind config.
-   The letter-spacing:0 rule is still correct for Arabic.
-   ───────────────────────────────────────────────────────────── */
-.font-arabic {
-  letter-spacing: 0;
-  /* font-family intentionally removed — resolved via Tailwind */
-}
-
-/* RTL / LTR Support
-   MainLayout.tsx already sets dir and lang on <html> dynamically.
-   These classes are available for per-element overrides if needed. */
-.rtl {
-  direction: rtl;
-}
-
-.ltr {
-  direction: ltr;
-}
-
-/* Smooth transitions for all interactive elements */
-* {
-  transition-property: color, background-color, border-color, transform, opacity;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Enhanced animations */
-@keyframes slide-in-from-top {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-in {
-  animation-duration: 300ms;
-  animation-fill-mode: both;
-}
-
-.fade-in {
-  animation-name: fade-in;
-}
-
-.slide-in-from-top-2 {
-  animation-name: slide-in-from-top;
-}
-
-/* Better text rendering for Arabic — applies to all text now */
-* {
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Profile dropdown improvements */
-.profile-dropdown {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* globals.css additions — paste into your existing globals.css */
-
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* ── Brand ── */
-  --brand:        #A31755;
-  --brand-dark:   #7A1040;
-  --brand-light:  #F9EEF3;
-  --brand-xlight: #FDF5F8;
-  --blue:         #2B4DA8;
-  --blue-light:   #EBF0FB;
-  --green:        #2E9E4F;
+  /* ── Brand core ── */
+  --brand:          #A31755;
+  --brand-dark:     #7A1040;
+  --brand-hover:    #8B1248;
+  --brand-light:    #F9EEF3;
+  --brand-xlight:   #FDF5F8;
+
+  /* ── New blue ── */
+  --blue:           #405EAA;
+  --blue-dark:      #2B4DA8;
+  --blue-light:     #EAF0FF;
+
+  /* ── New green ── */
+  --green:          #A8D163;
+  --green-dark:     #2E9E4F;
+  --green-light:    #F2F9E6;
+
+  /* ── Gradient ── */
+  --gradient:       linear-gradient(135deg, #A31755 0%, #405EAA 100%);
+  --gradient-hover: linear-gradient(135deg, #8B1248 0%, #334e8e 100%);
+  --gradient-90:    linear-gradient(90deg, #A31755 0%, #405EAA 100%);
 
   /* ── Neutrals ── */
-  --cream:        #FDFAF8;
-  --cream-dark:   #F5F0EC;
-  --ink:          #1A1410;
-  --ink-secondary:#4A3F38;
-  --ink-muted:    #8C7E76;
-  --border:       #EDE8E3;
-  --border-soft:  #F3EFEC;
+  --cream:          #FFFEF9;
+  --cream-dark:     #F5F0EC;
+  --ink:            #1A1410;
+  --ink-secondary:  #4A3F38;
+  --ink-muted:      #8C7E76;
+  --border:         #F2F2F2;
+  --border-warm:    #EDE8E3;
+  --white:          #FFFFFF;
 
   /* ── Typography ── */
-  --font-display: 'DM Serif Display', Georgia, 'Times New Roman', serif;
-  --font-body:    'Instrument Sans', system-ui, -apple-system, sans-serif;
+  --font: 'Baloo Bhaijaan 2', system-ui, sans-serif;
+
+  /* ✅ PROFESSIONAL WEB TYPOGRAPHY SCALE */
+  --fs-hero:    3.2rem;   /* 52px */
+  --fs-h1:      2.4rem;   /* 38px */
+  --fs-h2:      1.8rem;   /* 28px */
+  --fs-h3:      1.4rem;   /* 22px */
+  --fs-body:    1rem;     /* 16px */
+  --fs-nav:     0.95rem;  /* 15px */
+  --fs-small:   0.875rem; /* 14px */
 
   /* ── Shadows ── */
-  --shadow-sm:    0 1px 4px rgba(26,20,16,0.06);
-  --shadow-md:    0 4px 20px rgba(26,20,16,0.08);
-  --shadow-lg:    0 8px 40px rgba(26,20,16,0.10);
-  --shadow-brand: 0 8px 32px rgba(163,23,85,0.18);
+  --shadow-sm:      0 1px 4px rgba(26,20,16,0.06);
+  --shadow-md:      0 4px 20px rgba(26,20,16,0.08);
+  --shadow-lg:      0 8px 40px rgba(26,20,16,0.10);
+  --shadow-brand:   0 8px 32px rgba(163,23,85,0.20);
+  --shadow-grad:    0 8px 32px rgba(64,94,170,0.22);
 }
 
-/* Base typography */
+/* Base */
+*, *::before, *::after { box-sizing: border-box; }
+
 body {
-  font-family: var(--font-body);
+  font-family: var(--font);
+  font-size: var(--fs-body);     /* ✅ Added */
+  line-height: 1.6;              /* ✅ Better readability */
   color: var(--ink);
   background: var(--cream);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.font-display { font-family: var(--font-display); }
-.font-body    { font-family: var(--font-body); }
+/* Arabic RTL — same font handles both scripts */
+[dir="rtl"] body,
+.font-arabic { font-family: var(--font); }
 
-/* ── Shared animations ── */
+/* ── Gradient utility classes ── */
+.bg-gradient        { background: var(--gradient); }
+.bg-gradient-90     { background: var(--gradient-90); }
+.text-gradient {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Animations ── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(28px); }
+  from { opacity: 0; transform: translateY(26px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-20px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to   { opacity: 1; transform: scale(1); }
-}
-@keyframes splashReveal {
-  from { opacity: 0; transform: translateY(16px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes splashDot {
-  0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
-  40%            { opacity: 1;   transform: scale(1.15); }
+@keyframes blobDrift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%      { transform: translate(20px,-28px) scale(1.04); }
+  66%      { transform: translate(-14px,14px) scale(0.97); }
 }
 @keyframes slideProgress {
   from { width: 0%; }
   to   { width: 100%; }
 }
-@keyframes blobDrift {
-  0%,100% { transform: translate(0,0) scale(1); }
-  33%     { transform: translate(18px,-28px) scale(1.04); }
-  66%     { transform: translate(-14px,12px) scale(0.97); }
+@keyframes splashReveal {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes splashDot {
+  0%,80%,100% { opacity: 0.25; transform: scale(0.8); }
+  40%          { opacity: 1;   transform: scale(1.2); }
 }
 
-.anim-fade-up   { animation: fadeUp   0.75s cubic-bezier(0.16,1,0.3,1) both; }
-.anim-fade-in   { animation: fadeIn   0.6s  ease both; }
-.anim-scale-in  { animation: scaleIn  0.7s  cubic-bezier(0.16,1,0.3,1) both; }
-.delay-1 { animation-delay: 0.08s; }
-.delay-2 { animation-delay: 0.18s; }
-.delay-3 { animation-delay: 0.28s; }
-.delay-4 { animation-delay: 0.38s; }
-.delay-5 { animation-delay: 0.48s; }
+.anim-up { animation: fadeUp 0.75s cubic-bezier(0.16,1,0.3,1) both; }
+.anim-in { animation: fadeIn 0.6s ease both; }
+.d1 { animation-delay: 0.05s; }
+.d2 { animation-delay: 0.17s; }
+.d3 { animation-delay: 0.29s; }
+.d4 { animation-delay: 0.41s; }
+.d5 { animation-delay: 0.53s; }
 
-/* ── Grain texture overlay (hero sections) ── */
+/* ── Grain overlay ── */
 .grain::after {
   content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-  opacity: 0.4;
-  mix-blend-mode: overlay;
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+  opacity: 0.5; mix-blend-mode: overlay;
 }
 
-/* ── Card hover lift ── */
+/* ── Card lift ── */
 .card-lift {
-  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1),
-              box-shadow 0.35s cubic-bezier(0.16,1,0.3,1),
-              border-color 0.25s ease;
+  transition: transform 0.32s cubic-bezier(0.16,1,0.3,1),
+              box-shadow 0.32s ease,
+              border-color 0.22s ease;
 }
 .card-lift:hover {
   transform: translateY(-5px);
-  box-shadow: var(--shadow-brand);
-  border-color: rgba(163,23,85,0.18) !important;
+  box-shadow: 0 12px 36px rgba(64,94,170,0.14);
+  border-color: rgba(64,94,170,0.28) !important;
 }
-
-/* ── Icon ring flip ── */
-.icon-ring {
-  transition: background 0.3s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
-}
-.card-lift:hover .icon-ring {
-  background: var(--brand) !important;
+.card-lift:hover .i-ring {
+  background: var(--gradient) !important;
   transform: scale(1.1) rotate(-4deg);
 }
-.card-lift:hover .icon-ring svg {
+.card-lift:hover .i-ring svg {
   color: white !important;
   stroke: white !important;
 }
+.i-ring {
+  transition: background 0.3s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+}
 
-/* ── Form field ── */
+/* ── Form inputs ── */
 .latnsa-input {
   width: 100%;
   padding: 13px 16px;
   border: 1.5px solid var(--border);
   border-radius: 12px;
   font-size: 14px;
-  font-family: var(--font-body);
+  font-family: var(--font);
   color: var(--ink);
   background: var(--cream);
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
@@ -272,8 +176,8 @@ body {
 }
 .latnsa-input:focus {
   border-color: var(--brand);
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(163,23,85,0.08);
+  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(163,23,85,0.09);
 }
 .latnsa-input::placeholder { color: var(--ink-muted); }
 .latnsa-input-icon-l { padding-left: 44px; }

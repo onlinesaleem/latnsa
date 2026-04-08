@@ -86,17 +86,17 @@ export default function ContactPage() {
   /* ── Success State ── */
   if (submitted) {
     return (
-      <div className={`min-h-screen bg-[#F7F2F4] flex items-center justify-center px-4 font-body ${isArabic ? 'rtl' : 'ltr'}`}>
+      <div className={`min-h-screen bg-[#FFFEF9] flex items-center justify-center px-4 font-body ${isArabic ? 'rtl' : 'ltr'}`}>
         <style jsx global>{`
-          @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-          .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+          @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+          . { font-family: 'Baloo Bhaijaan 2', system-ui, sans-serif; }
           .font-body    { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
         `}</style>
         <div className="max-w-md w-full bg-white rounded-3xl p-12 text-center shadow-[0_4px_40px_rgba(163,23,85,0.08)] border border-[#A31755]/10">
           <div className="w-16 h-16 bg-[#E8F5EE] rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-8 h-8 text-[#2E9E4F]" />
+            <CheckCircle className="w-8 h-8 text-[#A8D163]" />
           </div>
-          <h2 className={`font-display text-3xl text-gray-900 mb-3 ${isArabic ? 'font-arabic' : ''}`}>
+          <h2 className={` text-3xl text-gray-900 mb-3 ${isArabic ? 'font-arabic' : ''}`}>
             {isArabic ? 'تم إرسال رسالتك!' : 'Message sent!'}
           </h2>
           <p className={`text-[15px] text-gray-500 leading-relaxed mb-8 ${isArabic ? 'font-arabic' : ''}`}>
@@ -119,8 +119,8 @@ export default function ContactPage() {
     <div className={`min-h-screen bg-white font-body ${isArabic ? 'rtl' : 'ltr'}`}>
 
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        .font-display { font-family: 'DM Serif Display', Georgia, serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        . { font-family: 'Baloo Bhaijaan 2', system-ui, sans-serif; }
         .font-body    { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
 
         @keyframes fadeUp {
@@ -134,12 +134,12 @@ export default function ContactPage() {
         .field-input {
           width: 100%;
           padding: 13px 16px;
-          border: 1px solid #EDE8E3;
+          border: 1px solid #F2F2F2;
           border-radius: 12px;
           font-size: 14px;
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           color: #1A1410;
-          background: #FDFAF8;
+          background: #FFFEF9;
           transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
           outline: none;
         }
@@ -150,7 +150,7 @@ export default function ContactPage() {
         }
         .field-input-icon-l { padding-left: 44px; }
         .field-input-icon-r { padding-right: 44px; }
-        .field-input::placeholder { color: #8C7E76; }
+        .field-input::placeholder { color: #1A1410; }
 
         .contact-card {
           transition: transform 0.3s cubic-bezier(0.16,1,0.3,1),
@@ -165,7 +165,7 @@ export default function ContactPage() {
       `}</style>
 
       {/* ── Hero ── */}
-      <section className="relative bg-[#A31755] overflow-hidden">
+      <section className="relative overflow-hidden" style={{ background: "linear-gradient(135deg,#A31755 0%,#405EAA 100%)" }}>
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 right-[-100px] -translate-y-1/2 w-[400px] h-[400px] rounded-full border border-white/[0.08]" />
           <div className="absolute top-1/2 right-[-40px] -translate-y-1/2 w-[260px] h-[260px] rounded-full border border-white/[0.11]" />
@@ -176,7 +176,7 @@ export default function ContactPage() {
               {isArabic ? 'تواصل معنا' : 'Contact Us'}
             </span>
           </div>
-          <h1 className={`anim-2 font-display text-[42px] lg:text-[56px] text-white leading-[1.1] mb-5 ${isArabic ? 'font-arabic text-3xl lg:text-5xl' : ''}`}>
+          <h1 className={`anim-2  text-[42px] lg:text-[56px] text-white leading-[1.1] mb-5 ${isArabic ? 'font-arabic text-3xl lg:text-5xl' : ''}`}>
             {isArabic ? 'اتصل بنا' : <>We'd love<br />to hear from you</>}
           </h1>
           <p className={`anim-3 text-white/70 text-[16px] max-w-xl mx-auto leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
@@ -223,7 +223,7 @@ export default function ContactPage() {
           {/* Left — info (2 cols) */}
           <div className="lg:col-span-2 space-y-8">
             <div>
-              <h2 className={`font-display text-3xl lg:text-4xl text-gray-900 mb-4 leading-snug ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
+              <h2 className={` text-3xl lg:text-4xl text-gray-900 mb-4 leading-snug ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
                 {isArabic ? 'معلومات التواصل' : <>Get in touch<br />with our team</>}
               </h2>
               <p className={`text-[15px] text-gray-500 leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
@@ -245,7 +245,7 @@ export default function ContactPage() {
                   { en: 'Full confidentiality guaranteed', ar: 'سرية تامة مضمونة' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#2E9E4F] flex items-center justify-center flex-shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-[#A8D163] flex items-center justify-center flex-shrink-0">
                       <CheckCircle className="w-3 h-3 text-white" />
                     </div>
                     <span className={`text-[14px] text-gray-700 ${isArabic ? 'font-arabic' : ''}`}>
@@ -257,9 +257,9 @@ export default function ContactPage() {
             </div>
 
             {/* Security note */}
-            <div className="flex items-center gap-3 p-4 bg-[#EBF0FB] border border-[#2B4DA8]/10 rounded-xl">
-              <Shield className="w-5 h-5 text-[#2B4DA8] flex-shrink-0" />
-              <p className={`text-[13px] text-[#2B4DA8] leading-snug ${isArabic ? 'font-arabic' : ''}`}>
+            <div className="flex items-center gap-3 p-4 bg-[#EAF0FF] border border-[#405EAA]/10 rounded-xl">
+              <Shield className="w-5 h-5 text-[#405EAA] flex-shrink-0" />
+              <p className={`text-[13px] text-[#405EAA] leading-snug ${isArabic ? 'font-arabic' : ''}`}>
                 {isArabic
                   ? 'جميع رسائلك محمية ومشفرة بشكل آمن.'
                   : 'All your messages are protected and securely encrypted.'}
@@ -273,7 +273,7 @@ export default function ContactPage() {
 
               {/* Form header strip */}
               <div className="bg-[#A31755] px-8 py-6">
-                <h3 className={`font-display text-2xl text-white mb-1 ${isArabic ? 'font-arabic' : ''}`}>
+                <h3 className={` text-2xl text-white mb-1 ${isArabic ? 'font-arabic' : ''}`}>
                   {isArabic ? 'أرسل لنا رسالة' : 'Send us a message'}
                 </h3>
                 <p className={`text-white/65 text-[13.5px] ${isArabic ? 'font-arabic' : ''}`}>
@@ -360,7 +360,7 @@ export default function ContactPage() {
                   disabled={loading}
                   className={`
                     w-full flex items-center justify-center gap-3
-                    px-8 py-4 bg-[#A31755] hover:bg-[#8B1248]
+                    px-8 py-4 hover:opacity-90
                     text-white font-semibold text-[15px] rounded-xl
                     transition-all duration-200
                     disabled:opacity-60 disabled:cursor-not-allowed
@@ -391,7 +391,7 @@ export default function ContactPage() {
           <p className={`text-[13px] font-semibold tracking-widest uppercase text-gray-400 mb-4 ${isArabic ? 'font-arabic' : ''}`}>
             {isArabic ? 'هل أنت جاهز؟' : 'Ready to begin?'}
           </p>
-          <h2 className={`font-display text-3xl lg:text-4xl text-gray-900 mb-5 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
+          <h2 className={` text-3xl lg:text-4xl text-gray-900 mb-5 ${isArabic ? 'font-arabic text-2xl lg:text-3xl' : ''}`}>
             {isArabic ? 'ابدأ التقييم الآن' : 'Take the first step today'}
           </h2>
           <p className={`text-[15px] text-gray-500 mb-8 max-w-lg mx-auto leading-relaxed ${isArabic ? 'font-arabic' : ''}`}>
