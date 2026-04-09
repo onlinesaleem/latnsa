@@ -165,7 +165,7 @@ export default function MainNavigation({ language, onLanguageChange }: MainNavig
                 </Link>
                 <Link href="/auth/register"
                   className="px-5 py-2.5 text-[13.5px] font-semibold text-white rounded-xl transition-all duration-200"
-                  style={{ fontFamily: FONT, background: 'linear-gradient(135deg,#A31755,#405EAA)', boxShadow: '0 2px 12px rgba(64,94,170,0.28)' }}>
+                  style={{ fontFamily: FONT, background: '#a8d163', boxShadow: '0 2px 12px rgba(64,94,170,0.28)' }}>
                   {isArabic ? 'احجز الآن' : 'Book Now'}
                 </Link>
               </div>
