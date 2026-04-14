@@ -34,8 +34,17 @@ module.exports = {
         }
       },
       fontFamily: {
-        'arabic': ['Cairo', 'Arial', 'sans-serif'],
-        'english': ['Inter', 'system-ui', 'sans-serif'],
+        // ── NEW: single font for both English and Arabic ──────────────
+        // `font-baloo` class applies Baloo Bhajaan 2 everywhere.
+        // The CSS variable --font-baloo is injected by next/font in layout.tsx.
+        'baloo': ['var(--font-baloo)', 'sans-serif'],
+
+        // ── KEPT for backward compatibility ──────────────────────────
+        // If any existing component still uses font-arabic or font-english
+        // they will now also resolve to Baloo Bhajaan 2.
+        // You can remove these later once you've cleaned up old usages.
+        'arabic': ['var(--font-baloo)', 'sans-serif'],
+        'english': ['var(--font-baloo)', 'sans-serif'],
       },
       spacing: {
         '18': '4.5rem',

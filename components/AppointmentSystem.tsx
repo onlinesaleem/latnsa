@@ -20,7 +20,8 @@ import {
   Edit,
   Trash2,
   Filter,
-  Search
+  Search,
+  X
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -45,7 +46,6 @@ type AppointmentStatus =
   | 'COMPLETED'
   | 'CANCELLED'
   | 'NO_SHOW';
-
 
 interface Appointment {
   id: string
@@ -77,6 +77,8 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
   const [filterType, setFilterType] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  
+  // Use language prop directly - this ensures reactivity when prop changes
   const isArabic = language === 'arabic'
 
   const {
@@ -90,6 +92,11 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
     defaultValues: { duration: 30 }
   })
 
+  // Reset form when language changes
+  useEffect(() => {
+    // This ensures form re-renders when language changes
+  }, [language])
+
   // Load appointments
   const loadAppointments = async () => {
     setLoading(true)
@@ -100,11 +107,11 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
       if (response.ok) {
         setAppointments(data.appointments)
       } else {
-        toast.error('Failed to load appointments')
+        toast.error(isArabic ? 'فشل في تحميل المواعيد' : 'Failed to load appointments')
       }
     } catch (error) {
       console.error('Error loading appointments:', error)
-      toast.error('Error loading appointments')
+      toast.error(isArabic ? 'خطأ في تحميل المواعيد' : 'Error loading appointments')
     } finally {
       setLoading(false)
     }
@@ -156,13 +163,13 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
       })
 
       if (response.ok) {
-        toast.success('Appointment status updated')
+        toast.success(isArabic ? 'تم تحديث حالة الموعد' : 'Appointment status updated')
         loadAppointments()
       } else {
-        toast.error('Failed to update appointment')
+        toast.error(isArabic ? 'فشل في تحديث الموعد' : 'Failed to update appointment')
       }
     } catch (error) {
-      toast.error('Error updating appointment')
+      toast.error(isArabic ? 'خطأ في تحديث الموعد' : 'Error updating appointment')
     }
   }
 
@@ -199,7 +206,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
     return types[type] ? (isArabic ? types[type].ar : types[type].en) : type
   }
 
-  // Get status badge color
+  // Get status badge color and label
   const getStatusColor = (status: AppointmentStatus) => {
     const colors = {
       SCHEDULED: 'bg-blue-100 text-blue-800',
@@ -210,6 +217,18 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
       NO_SHOW: 'bg-orange-100 text-orange-800'
     }
     return colors[status] || 'bg-gray-100 text-gray-800'
+  }
+
+  const getStatusLabel = (status: AppointmentStatus) => {
+    const labels = {
+      SCHEDULED: { en: 'Scheduled', ar: 'مجدول' },
+      CONFIRMED: { en: 'Confirmed', ar: 'مؤكد' },
+      IN_PROGRESS: { en: 'In Progress', ar: 'قيد التنفيذ' },
+      COMPLETED: { en: 'Completed', ar: 'مكتمل' },
+      CANCELLED: { en: 'Cancelled', ar: 'ملغى' },
+      NO_SHOW: { en: 'No Show', ar: 'لم يحضر' }
+    }
+    return labels[status] ? (isArabic ? labels[status].ar : labels[status].en) : status
   }
 
   // Filter appointments
@@ -237,7 +256,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
   }
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${isArabic ? 'rtl' : 'ltr'}`}>
+    <div className={`min-h-screen bg-gray-50 ${isArabic ? 'rtl' : 'ltr'}`} key={language}>
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -255,7 +274,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
               onClick={() => setShowNewAppointment(true)}
               className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className={`w-4 h-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
               {isArabic ? 'موعد جديد' : 'New Appointment'}
             </button>
           </div>
@@ -267,11 +286,11 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+              <Search className={`absolute ${isArabic ? 'right-3' : 'left-3'} top-2.5 w-4 h-4 text-gray-400`} />
               <input
                 type="text"
                 placeholder={isArabic ? 'البحث في المواعيد...' : 'Search appointments...'}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className={`${isArabic ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -315,19 +334,19 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
                     {isArabic ? 'المريض' : 'Patient'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
                     {isArabic ? 'النوع' : 'Type'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
                     {isArabic ? 'التاريخ والوقت' : 'Date & Time'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
                     {isArabic ? 'الحالة' : 'Status'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
                     {isArabic ? 'الإجراءات' : 'Actions'}
                   </th>
                 </tr>
@@ -353,7 +372,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="mr-3 text-gray-400">
+                          <div className={`${isArabic ? 'ml-3' : 'mr-3'} text-gray-400`}>
                             {getAppointmentTypeIcon(appointment.type)}
                           </div>
                           <span className="text-sm text-gray-900">
@@ -364,7 +383,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm text-gray-900">
-                            {new Date(appointment.scheduledAt).toLocaleDateString()}
+                            {new Date(appointment.scheduledAt).toLocaleDateString(isArabic ? 'ar-SA' : 'en-US')}
                           </div>
                           <div className="text-sm text-gray-500">
                             {new Date(appointment.scheduledAt).toLocaleTimeString([], {
@@ -379,32 +398,37 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(appointment.status)}`}>
-                          {appointment.status.replace('_', ' ')}
+                          {getStatusLabel(appointment.status)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        {appointment.status === 'SCHEDULED' && (
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className={`flex ${isArabic ? 'space-x-reverse' : ''} space-x-2`}>
+                          {appointment.status === 'SCHEDULED' && (
+                            <button
+                              onClick={() => updateAppointmentStatus(appointment.id, 'CONFIRMED')}
+                              className="text-green-600 hover:text-green-900"
+                              title={isArabic ? 'تأكيد' : 'Confirm'}
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </button>
+                          )}
+                          
                           <button
-                            onClick={() => updateAppointmentStatus(appointment.id, 'CONFIRMED')}
-                            className="text-green-600 hover:text-green-900"
+                            onClick={() => setEditingAppointment(appointment.id)}
+                            className="text-blue-600 hover:text-blue-900"
+                            title={isArabic ? 'تعديل' : 'Edit'}
                           >
-                            <CheckCircle className="w-4 h-4" />
+                            <Edit className="w-4 h-4" />
                           </button>
-                        )}
-                        
-                        <button
-                          onClick={() => setEditingAppointment(appointment.id)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        
-                        <button
-                          onClick={() => cancelAppointment(appointment.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                          
+                          <button
+                            onClick={() => cancelAppointment(appointment.id)}
+                            className="text-red-600 hover:text-red-900"
+                            title={isArabic ? 'إلغاء' : 'Cancel'}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -424,7 +448,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
         {/* New Appointment Modal */}
         {showNewAppointment && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div className={`relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white ${isArabic ? 'rtl' : 'ltr'}`}>
               <div className="mt-3">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium text-gray-900">
@@ -434,11 +458,11 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
                     onClick={() => setShowNewAppointment(false)}
                     className="text-gray-400 hover:text-gray-600"
                   >
-                    <div className="w-6 h-6" />
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
 
-                <div className="space-y-6">
+                <form onSubmit={handleSubmit(handleCreateAppointment)} className="space-y-6">
                   {/* Patient Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -578,7 +602,7 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
                     />
                   </div>
 
-                  <div className="flex justify-end space-x-4">
+                  <div className={`flex justify-end ${isArabic ? 'space-x-reverse' : ''} space-x-4`}>
                     <button
                       type="button"
                       onClick={() => setShowNewAppointment(false)}
@@ -587,24 +611,24 @@ export default function AppointmentSystem({ language = 'english' }: AppointmentS
                       {isArabic ? 'إلغاء' : 'Cancel'}
                     </button>
                     <button
-                      onClick={handleSubmit(handleCreateAppointment)}
+                      type="submit"
                       disabled={loading}
                       className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                     >
                       {loading ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          <div className={`animate-spin rounded-full h-4 w-4 border-b-2 border-white ${isArabic ? 'ml-2' : 'mr-2'}`}></div>
                           {isArabic ? 'جاري الحجز...' : 'Booking...'}
                         </>
                       ) : (
                         <>
-                          <Calendar className="w-4 h-4 mr-2" />
+                          <Calendar className={`w-4 h-4 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                           {isArabic ? 'حجز الموعد' : 'Book Appointment'}
                         </>
                       )}
                     </button>
                   </div>
-                </div>
+                </form>
               </div>
             </div>
           </div>

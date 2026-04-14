@@ -16,7 +16,7 @@ const updateSchema = z.object({
 
 // GET Single Appointment
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -39,6 +39,11 @@ export async function GET(
             clinicalScore: true,
             recommendations: true
           }
+        },
+        patient: {
+          select: {
+            email: true,
+          }
         }
       }
     })
@@ -51,7 +56,7 @@ export async function GET(
     }
 
     // Check permission - users can only view their own appointments
-    if (session.user.role === 'USER' && appointment.patientEmail !== session.user.email) {
+    if (session.user.role === 'USER' && appointment.patient.email !== session.user.email) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }
@@ -110,7 +115,7 @@ export async function PATCH(
     }
 
     // Handle Zoom meeting updates for virtual consultations
-    let meetingUpdates = {}
+    //let _meetingUpdates = {}
     if (updateData.scheduledAt || updateData.duration) {
       if (existingAppointment.meetingId && 
           (existingAppointment.type === 'VIRTUAL_CONSULTATION' || existingAppointment.type === 'VIDEO_CALL')) {
@@ -165,7 +170,7 @@ export async function PATCH(
 
 // DELETE Appointment
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

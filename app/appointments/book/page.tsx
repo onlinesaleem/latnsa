@@ -1,31 +1,38 @@
-
-// ==================================================================
-// 1. PUBLIC BOOKING PAGE - /app/appointments/book/page.tsx
-// ==================================================================
+// app/appointments/book/page.tsx
+'use client' // Add this at the top!
 
 import { Suspense } from 'react'
-import { Metadata } from 'next'
+
+import { useLanguage } from '@/components/MainLayout'
+import { useSearchParams } from 'next/navigation'
+
 import AppointmentBooking from '@/components/AppointmentBooking'
 
-export const metadata: Metadata = {
-  title: 'Book Appointment | Healthcare System',
-  description: 'Schedule your medical appointment online'
+// Remove metadata export - it's not compatible with 'use client'
+
+function AppointmentContent() {
+  const { language } = useLanguage()
+  const searchParams = useSearchParams()
+
+  return (
+    <AppointmentBooking
+      language={language}
+      assessmentId={searchParams.get('assessmentId') || undefined}
+      patientEmail={searchParams.get('patientEmail') || undefined}
+      patientName={searchParams.get('patientName') || undefined}
+    />
+  )
 }
 
-export default function BookAppointmentPage({
-  searchParams
-}: {
-  searchParams: { assessmentId?: string; patientEmail?: string; patientName?: string; language?: string }
-}) {
+export default function BookAppointmentPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Suspense fallback={<div>Loading...</div>}>
-        <AppointmentBooking
-          language={searchParams.language === 'arabic' ? 'arabic' : 'english'}
-          assessmentId={searchParams.assessmentId}
-          patientEmail={searchParams.patientEmail}
-          patientName={searchParams.patientName}
-        />
+      <Suspense fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      }>
+        <AppointmentContent />
       </Suspense>
     </div>
   )

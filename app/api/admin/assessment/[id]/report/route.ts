@@ -71,7 +71,7 @@ export async function POST(
 
     // Generate PDF report
     const generator = new PDFReportGenerator(options.language)
-    const pdfDoc = generator.generateAssessmentReport(assessment, options)
+    const pdfDoc = generator.generateAssessmentReport(assessment as any, options)
     
     if (options.format === 'email' && options.emailTo) {
       // Generate PDF buffer and send via email
@@ -82,6 +82,7 @@ export async function POST(
       const patientName = assessment.patient.fullName
       const patientMRN = assessment.patient.mrn
       const assessmentNumber = assessment.assessmentNumber
+      const gender=assessment.patient.gender
       
       // Determine who submitted (for context)
       const submitterInfo = assessment.formType === 'PROXY' 

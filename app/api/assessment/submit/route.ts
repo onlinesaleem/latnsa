@@ -7,6 +7,20 @@ import { sendEmail, emailTemplates } from '@/lib/email'
 import { z } from 'zod'
 import { Language, AssessmentStatus, NotificationType, AnswerType } from '@prisma/client'
 
+
+interface Question {
+  id: string;
+    //type: Enums.QuestionType;
+    text: string;
+    textAr: string;
+    hasScoring: boolean;
+    scoringConfig: string | null;
+    minScore: number | null;
+    maxScore: number | null;
+    scoreUnit: string | null;
+    interpretationRules: string | null;
+}
+
 const submitAssessmentSchema = z.object({
   patientId: z.string(),
   formType: z.enum(['SELF', 'PROXY']),
@@ -39,7 +53,7 @@ async function generateAssessmentNumber(): Promise<string> {
 }
 
 // Helper function to determine answer type
-function determineAnswerType(value: any, questionType?: string): AnswerType {
+function determineAnswerType(value: AnswerType, questionType?: string): AnswerType {
   if (Array.isArray(value)) return AnswerType.MULTIPLE_CHOICE
   if (typeof value === 'boolean') return AnswerType.BOOLEAN
   if (typeof value === 'number') return AnswerType.NUMBER
@@ -50,8 +64,9 @@ function determineAnswerType(value: any, questionType?: string): AnswerType {
 
 // NEW: Calculate score based on question's scoring config
 function calculateScore(
-  answerValue: any,
-  question: any
+  
+  answerValue: AnswerType,
+  question: Question,
 ): { score: number | null; scoreLabel: string | null } {
   
   if (!question.hasScoring || !question.scoringConfig) {
@@ -218,7 +233,7 @@ export async function POST(request: NextRequest) {
         console.log(`Questions with scoring enabled: ${questions.filter(q => q.hasScoring).length}`)
 
         const responseRecords = Object.entries(validatedData.responses)
-          .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+          .filter(([ value]) => value !== undefined && value !== null && value !== '')
           .map(([questionId, answerValue]) => {
             const question = questionMap.get(questionId)
             

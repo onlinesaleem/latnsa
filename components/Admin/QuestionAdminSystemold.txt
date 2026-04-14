@@ -12,44 +12,19 @@ import {
   ToggleRight,
   List,
   Settings,
+  
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { QuestionGroup, Question } from '@/app/types/QuestionGroupTypes'
-
-// Define interfaces for the data structures used in the component
-interface OptionSet {
-  english: string[];
-  arabic: string[];
-}
-
-interface ScoreRules {
-  [key: string]: number;
-}
-
-interface QuestionFormData {
-  questionGroupId: string;
-  text: string;
-  textAr: string;
-  type: string;
-  isRequired: boolean;
-  order: number;
-  options: OptionSet;
-  hasScoring: boolean;
-  scoringType: string;
-  scoreRules: ScoreRules;
-  minScore: number;
-  maxScore: number;
-  scoreUnit: string;
-  applicableFor: string[];
-}
+import { QuestionGroup, Question } from '@/app/types/QuestionGroupTypes' // Import your types
 
 export default function QuestionAdminSystem() {
-  const [view, setView] = useState('groups')
+ const [view, setView] = useState('groups') // 'groups' or 'questions'
   const [groups, setGroups] = useState<QuestionGroup[]>([])
   const [selectedGroup, setSelectedGroup] = useState<QuestionGroup | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(false)
   
+  // Modals
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [showQuestionModal, setShowQuestionModal] = useState(false)
   const [editingGroup, setEditingGroup] = useState<QuestionGroup | null>(null)
@@ -65,6 +40,7 @@ export default function QuestionAdminSystem() {
     }
   }, [selectedGroup])
 
+  // Load question groups
   const loadGroups = async () => {
     setLoading(true)
     try {
@@ -80,6 +56,7 @@ export default function QuestionAdminSystem() {
     }
   }
 
+  // Load questions for a group
   const loadQuestions = async (groupId: string) => {
     setLoading(true)
     try {
@@ -95,8 +72,9 @@ export default function QuestionAdminSystem() {
     }
   }
 
+  // Delete group
   const deleteGroup = async (id: string | undefined) => {
-    if (!id || !confirm('Delete this group and all its questions?')) return
+    if (!confirm('Delete this group and all its questions?')) return
     
     try {
       const response = await fetch(`/api/admin/question-groups/${id}`, {
@@ -115,26 +93,28 @@ export default function QuestionAdminSystem() {
     }
   }
 
-  const deleteQuestion = async (id: string) => {
-    if (!confirm('Delete this question?')) return
-    
-    try {
-      const response = await fetch(`/api/admin/questions/${id}`, {
-        method: 'DELETE'
-      })
-      if (response.ok) {
-        toast.success('Question deleted')
-        if (selectedGroup) {
-          loadQuestions(selectedGroup.id)
-        }
+// Delete question
+const deleteQuestion = async (id: string) => {
+  if (!confirm('Delete this question?')) return
+  
+  try {
+    const response = await fetch(`/api/admin/questions/${id}`, {
+      method: 'DELETE'
+    })
+    if (response.ok) {
+      toast.success('Question deleted')
+      if (selectedGroup) { // Add this null check
+        loadQuestions(selectedGroup.id)
       }
-    } catch (_error) {
-      toast.error('Failed to delete question')
     }
+  } catch (_error) {
+    toast.error('Failed to delete question')
   }
+}
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
@@ -173,6 +153,7 @@ export default function QuestionAdminSystem() {
 
       <div className="max-w-7xl mx-auto p-4">
         <div className="grid grid-cols-12 gap-4">
+          {/* Sidebar - Groups List */}
           <div className="col-span-3 bg-white rounded-lg shadow p-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-semibold text-gray-900">Question Groups</h2>
@@ -236,6 +217,7 @@ export default function QuestionAdminSystem() {
             )}
           </div>
 
+          {/* Main Content - Questions or Group Details */}
           <div className="col-span-9">
             {!selectedGroup ? (
               <div className="bg-white rounded-lg shadow p-8 text-center">
@@ -249,6 +231,7 @@ export default function QuestionAdminSystem() {
               </div>
             ) : (
               <>
+                {/* Group Header */}
                 <div className="bg-white rounded-lg shadow p-6 mb-4">
                   <div className="flex justify-between items-start">
                     <div>
@@ -277,6 +260,7 @@ export default function QuestionAdminSystem() {
                   </div>
                 </div>
 
+                {/* Questions List */}
                 <div className="bg-white rounded-lg shadow">
                   {loading ? (
                     <div className="p-8 text-center text-gray-500">Loading questions...</div>
@@ -322,6 +306,7 @@ export default function QuestionAdminSystem() {
         </div>
       </div>
 
+      {/* Group Modal */}
       {showGroupModal && (
         <GroupModal
           group={editingGroup}
@@ -337,6 +322,7 @@ export default function QuestionAdminSystem() {
         />
       )}
 
+      {/* Question Modal */}
       {showQuestionModal && selectedGroup && (
         <QuestionModal
           question={editingQuestion}
@@ -356,18 +342,22 @@ export default function QuestionAdminSystem() {
   )
 }
 
-interface QuestionItemProps {
-  question: Question;
-  index: number;
-  onEdit: () => void;
-  onDelete: () => void;
-}
-
-function QuestionItem({ question, index, onEdit, onDelete }: QuestionItemProps) {
+// Question Item Component
+function QuestionItem({ 
+  question, 
+  index, 
+  onEdit, 
+  onDelete 
+}: { 
+  question: Question
+  index: number
+  onEdit: () => void
+  onDelete: () => void
+}) {
   const [expanded, setExpanded] = useState(false)
   
-  const options = question.options ? JSON.parse(question.options) as OptionSet : null
-  const scoringConfig = question.scoringConfig ? JSON.parse(question.scoringConfig) as { scores?: ScoreRules } : null
+  const options = question.options ? JSON.parse(question.options) : null
+  const scoringConfig = question.scoringConfig ? JSON.parse(question.scoringConfig) : null
 
   return (
     <div className="p-4 hover:bg-gray-50">
@@ -407,11 +397,12 @@ function QuestionItem({ question, index, onEdit, onDelete }: QuestionItemProps) 
 
           {expanded && (
             <div className="ml-7 mt-4 space-y-3">
+              {/* Options */}
               {options && (
                 <div>
                   <p className="text-xs font-semibold text-gray-700 mb-2">Answer Options:</p>
                   <div className="space-y-1">
-                    {options.english.map((opt: string, i: number) => (
+                    {options.english.map((opt:any, i) => (
                       <div key={i} className="flex items-center gap-2 text-sm">
                         <span className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-xs">
                           {i + 1}
@@ -430,6 +421,7 @@ function QuestionItem({ question, index, onEdit, onDelete }: QuestionItemProps) 
                 </div>
               )}
 
+              {/* Scoring Info */}
               {question.hasScoring && (
                 <div className="bg-blue-50 border border-blue-200 rounded p-3">
                   <p className="text-xs font-semibold text-blue-900 mb-1">Scoring Configuration</p>
@@ -474,14 +466,13 @@ function QuestionItem({ question, index, onEdit, onDelete }: QuestionItemProps) 
   )
 }
 
-interface GroupModalProps {
-  group: QuestionGroup | null;
-  onClose: () => void;
-  onSave: () => void;
-}
-
-function GroupModal({ group, onClose, onSave }: GroupModalProps) {
-  const [formData, setFormData] = useState({
+// Group Modal Component
+function GroupModal({ group, onClose, onSave }: { 
+  group: QuestionGroup | null
+  onClose: () => void
+  onSave: () => void
+}) {
+  const [formData, setFormData] = useState({ // Add this state
     name: group?.name || '',
     nameAr: group?.nameAr || '',
     description: group?.description || '',
@@ -492,7 +483,7 @@ function GroupModal({ group, onClose, onSave }: GroupModalProps) {
   })
   const [saving, setSaving] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => { // Add type for event
     e.preventDefault()
     setSaving(true)
 
@@ -513,7 +504,7 @@ function GroupModal({ group, onClose, onSave }: GroupModalProps) {
       } else {
         toast.error('Failed to save group')
       }
-    } catch (_error) {
+    } catch (error) {
       toast.error('Error saving group')
     } finally {
       setSaving(false)
@@ -646,25 +637,29 @@ function GroupModal({ group, onClose, onSave }: GroupModalProps) {
   )
 }
 
-interface QuestionModalProps {
-  question: Question | null;
-  groupId: string;
-  onClose: () => void;
-  onSave: () => void;
-}
-
-function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProps) {
-  const [formData, setFormData] = useState<QuestionFormData>({
+// Question Modal Component (Simplified for brevity - full version would be larger)
+function QuestionModal({ 
+  question, 
+  groupId, 
+  onClose, 
+  onSave 
+}: { 
+  question: Question | null
+  groupId: string
+  onClose: () => void
+  onSave: () => void
+}) {
+  const [formData, setFormData] = useState({
     questionGroupId: groupId,
     text: question?.text || '',
     textAr: question?.textAr || '',
     type: question?.type || 'RADIO',
     isRequired: question?.isRequired ?? false,
     order: question?.order || 0,
-    options: question?.options ? JSON.parse(question.options) as OptionSet : { english: [''], arabic: [''] },
+    options: question?.options ? JSON.parse(question.options) : { english: [''], arabic: [''] },
     hasScoring: question?.hasScoring ?? false,
     scoringType: question?.scoringType || 'WEIGHTED',
-    scoreRules: question?.scoringConfig ? JSON.parse(question.scoringConfig).scores as ScoreRules : {},
+    scoreRules: question?.scoringConfig ? JSON.parse(question.scoringConfig).scores : {},
     minScore: question?.minScore || 0,
     maxScore: question?.maxScore || 1,
     scoreUnit: question?.scoreUnit || 'point',
@@ -682,23 +677,23 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
     })
   }
 
-  const updateOption = (index: number, lang: 'english' | 'arabic', value: string) => {
+  const updateOption = (index: string | number, lang: string, value: string) => {
     const newOptions = { ...formData.options }
     newOptions[lang][index] = value
     setFormData({ ...formData, options: newOptions })
   }
 
-  const removeOption = (index: number) => {
+  const removeOption = (index: any) => {
     setFormData({
       ...formData,
       options: {
-        english: formData.options.english.filter((_, i) => i !== index),
-        arabic: formData.options.arabic.filter((_, i) => i !== index)
+        english: formData.options.english.filter((_:any, i:any) => i !== index),
+        arabic: formData.options.arabic.filter((_:any, i:any) => i !== index)
       }
     })
   }
 
-  const updateScore = (optionText: string, score: string) => {
+  const updateScore = (optionText: any, score: string) => {
     setFormData({
       ...formData,
       scoreRules: {
@@ -708,7 +703,7 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
     })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
     setSaving(true)
 
@@ -739,7 +734,7 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
         const data = await response.json()
         toast.error(data.error || 'Failed to save question')
       }
-    } catch (_error) {
+    } catch (error) {
       toast.error('Error saving question')
     } finally {
       setSaving(false)
@@ -759,6 +754,7 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Question Text */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold mb-2">
@@ -787,6 +783,7 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
             </div>
           </div>
 
+          {/* Question Type & Settings */}
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-semibold mb-2">Question Type</label>
@@ -825,6 +822,7 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
             </div>
           </div>
 
+          {/* Answer Options */}
           <div>
             <div className="flex justify-between items-center mb-3">
               <label className="block text-sm font-semibold">Answer Options</label>
@@ -839,7 +837,7 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
             </div>
 
             <div className="space-y-3">
-              {formData.options.english.map((opt: string, idx: number) => (
+              {formData.options.english.map((opt:any, idx:any) => (
                 <div key={idx} className="border rounded-lg p-4 bg-gray-50">
                   <div className="flex justify-between mb-3">
                     <span className="text-sm font-medium text-gray-700">Option {idx + 1}</span>
@@ -892,6 +890,7 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
             </div>
           </div>
 
+          {/* Scoring Toggle */}
           <div className="border-t pt-6">
             <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
               <div>
@@ -922,6 +921,7 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
             </div>
           </div>
 
+          {/* Scoring Configuration */}
           {formData.hasScoring && (
             <div className="space-y-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <h3 className="font-semibold text-gray-900">Scoring Configuration</h3>
@@ -975,6 +975,7 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
             </div>
           )}
 
+          {/* Applicable For */}
           <div>
             <label className="block text-sm font-semibold mb-2">Applicable For</label>
             <div className="flex gap-4">
@@ -1007,6 +1008,7 @@ function QuestionModal({ question, groupId, onClose, onSave }: QuestionModalProp
             </div>
           </div>
 
+          {/* Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t">
             <button
               type="button"

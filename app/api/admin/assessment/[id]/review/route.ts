@@ -42,20 +42,21 @@ export async function POST(
         isReviewed: true,
         reviewedBy: session.user.name || 'Clinical Staff',
         reviewedAt: new Date()
-      }
+      },
+      include: {patient: true}
     })
 
     // Send notification email to patient if assessment is completed
-    if (validatedData.status === 'COMPLETED' && assessment.registrantEmail) {
+    if (validatedData.status === 'COMPLETED' && assessment.patient?.email) {
       try {
         await sendEmail({
-          to: assessment.registrantEmail,
+          to: assessment.patient.email,  
           subject: 'Your Health Assessment Review is Complete',
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #0ea5e9;">Assessment Review Complete</h2>
               
-              <p>Dear ${assessment.registrantName},</p>
+              <p>Dear ${assessment.patient.fullName},</p>
               
               <p>Your health assessment has been reviewed by our clinical team.</p>
               
@@ -92,11 +93,11 @@ export async function POST(
       data: {
         assessmentId: assessment.id,
         type: validatedData.status === 'COMPLETED' ? 'ASSESSMENT_REVIEWED' : 'SYSTEM',
-        recipient: assessment.registrantEmail || 'unknown',
+        recipient: assessment.patient.email || 'unknown',
         subject: validatedData.status === 'COMPLETED' ? 'Assessment Review Complete' : 'Assessment Under Review',
         content: validatedData.reviewNotes,
-        sent: !!assessment.registrantEmail,
-        sentAt: assessment.registrantEmail ? new Date() : null
+        sent: !!assessment.patient.email,
+        sentAt: assessment.patient.email ? new Date() : null
       }
     })
 

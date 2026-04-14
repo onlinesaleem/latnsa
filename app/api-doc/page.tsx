@@ -1,12 +1,13 @@
 // app/api-doc/page.tsx
 'use client';
 
+import { Link } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
-
+type spec={id:number,name:string}|null
 export default function ApiDoc() {
-  const [spec, setSpec] = useState<any>(null);
+  const [spec, setSpec] = useState<spec>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,10 +85,10 @@ export default function ApiDoc() {
             <h1 className="text-2xl font-bold text-gray-800">Latnsa Health</h1>
           </div>
           <nav className="hidden md:flex space-x-6">
-            <a href="/" className="text-gray-600 hover:text-green-600 transition-colors">Home</a>
-            <a href="/about" className="text-gray-600 hover:text-green-600 transition-colors">About</a>
-            <a href="/contact" className="text-gray-600 hover:text-green-600 transition-colors">Contact</a>
-            <a href="/assessment" className="text-gray-600 hover:text-green-600 transition-colors">Assessment</a>
+            <Link href="/" className="text-gray-600 hover:text-green-600 transition-colors">Home</Link>
+            <Link href="/about" className="text-gray-600 hover:text-green-600 transition-colors">About</Link>
+            <Link href="/contact" className="text-gray-600 hover:text-green-600 transition-colors">Contact</Link>
+            <Link href="/assessment" className="text-gray-600 hover:text-green-600 transition-colors">Assessment</Link>
           </nav>
           <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
             Sign In

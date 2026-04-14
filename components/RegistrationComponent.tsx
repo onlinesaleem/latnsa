@@ -7,11 +7,52 @@ import { z } from 'zod'
 import { Mail, Phone, User, Lock, Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
+// Improved phone validation for Saudi numbers
+// Accepts: 05XXXXXXXX, 5XXXXXXXX, 9665XXXXXXXX, +9665XXXXXXXX
+const phoneValidation = z.string().refine((val) => {
+  // Remove all spaces and special characters except +
+  const cleaned = val.replace(/[\s\-()]/g, '')
+  
+  // Pattern 1: 05XXXXXXXX (10 digits starting with 05)
+  if (/^05\d{8}$/.test(cleaned)) return true
+  
+  // Pattern 2: 5XXXXXXXX (9 digits starting with 5)
+  if (/^5\d{8}$/.test(cleaned)) return true
+  
+  // Pattern 3: 9665XXXXXXXX (12 digits starting with 966)
+  if (/^9665\d{8}$/.test(cleaned)) return true
+  
+  // Pattern 4: +9665XXXXXXXX (13 chars starting with +966)
+  if (/^\+9665\d{8}$/.test(cleaned)) return true
+  
+  return false
+}, 'Please enter a valid 10-digit Saudi phone number (e.g., 0501234567)')
+
+// Email validation
+const emailValidation = z.string().email('Please enter a valid email address').refine((email) => {
+  const parts = email.split('@')
+  if (parts.length !== 2) return false
+  const domain = parts[1]
+  return domain.includes('.') && domain.split('.').pop()!.length >= 2
+}, 'Please enter a valid email address with proper domain')
+
 const registrationSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   identifier: z.string().min(1, 'Email or phone is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
+  password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')),
   language: z.enum(['english', 'arabic'])
+}).refine((data) => {
+  // Check if it's an email or phone
+  const hasAtSymbol = data.identifier.includes('@')
+  
+  if (hasAtSymbol) {
+    return emailValidation.safeParse(data.identifier).success
+  } else {
+    return phoneValidation.safeParse(data.identifier).success
+  }
+}, {
+  message: 'Please enter a valid email or 10-digit phone number',
+  path: ['identifier']
 })
 
 type RegistrationForm = z.infer<typeof registrationSchema>
@@ -22,7 +63,6 @@ interface RegistrationProps {
 }
 
 export default function RegistrationComponent({ onSuccess, requirePassword = true }: RegistrationProps) {
-  // Default language is Arabic as requested
   const [currentStep, setCurrentStep] = useState<'form' | 'otp' | 'success'>('form')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -36,12 +76,17 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     watch,
-    setValue
+    setValue,
+    trigger
   } = useForm<RegistrationForm>({
     resolver: zodResolver(registrationSchema),
-    defaultValues: { language: 'arabic' }
+    defaultValues: { 
+      language: 'arabic',
+      password: ''
+    },
+    mode: 'onChange'
   })
 
   // Keep react-hook-form language in sync with local state
@@ -51,31 +96,98 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
 
   const watchedIdentifier = watch('identifier')
 
-  // Auto-detect identifier type
+  // Helper function to normalize phone number
+  const normalizePhone = (phone: string): string => {
+    // Remove all spaces and special characters except +
+    let cleaned = phone.replace(/[\s\-()]/g, '')
+    
+    // If starts with +966, remove it
+    if (cleaned.startsWith('+966')) {
+      cleaned = '0' + cleaned.substring(4)
+    }
+    // If starts with 966, remove it
+    else if (cleaned.startsWith('966')) {
+      cleaned = '0' + cleaned.substring(3)
+    }
+    // If starts with 5 (9 digits), add 0
+    else if (cleaned.startsWith('5') && cleaned.length === 9) {
+      cleaned = '0' + cleaned
+    }
+    
+    return cleaned
+  }
+
+  // Helper function to validate email format
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+    if (!emailRegex.test(email)) return false
+    
+    const parts = email.split('@')
+    if (parts.length !== 2) return false
+    
+    const domain = parts[1]
+    return domain.includes('.') && domain.split('.').pop()!.length >= 2
+  }
+
+  // Helper function to validate phone format
+  const isValidPhone = (phone: string): boolean => {
+    const cleaned = phone.replace(/[\s\-()]/g, '')
+    
+    // Check all valid patterns
+    return /^05\d{8}$/.test(cleaned) ||      // 05XXXXXXXX
+           /^5\d{8}$/.test(cleaned) ||        // 5XXXXXXXX
+           /^9665\d{8}$/.test(cleaned) ||     // 9665XXXXXXXX
+           /^\+9665\d{8}$/.test(cleaned)      // +9665XXXXXXXX
+  }
+
+  // Auto-detect identifier type with improved validation
   useEffect(() => {
     if (watchedIdentifier) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      const phoneRegex = /^(\+966|966|0)?[0-9]{8,9}$/
-
-      if (emailRegex.test(watchedIdentifier)) {
-        setOtpType('EMAIL')
-      } else if (phoneRegex.test(watchedIdentifier)) {
-        setOtpType('SMS')
+      const hasAtSymbol = watchedIdentifier.includes('@')
+      
+      if (hasAtSymbol) {
+        if (isValidEmail(watchedIdentifier)) {
+          setOtpType('EMAIL')
+        }
+      } else {
+        if (isValidPhone(watchedIdentifier)) {
+          setOtpType('SMS')
+        }
       }
+      
       setIdentifierValue(watchedIdentifier)
+      trigger('identifier')
     }
-  }, [watchedIdentifier])
+  }, [watchedIdentifier, trigger])
 
   const handleSendOtp = async (data: RegistrationForm) => {
-    // ensure language exists on data (zod will validate), but fallback to local state
+    // Validate identifier before proceeding
+    const hasAtSymbol = data.identifier.includes('@')
+    
+    if (hasAtSymbol) {
+      if (!isValidEmail(data.identifier)) {
+        toast.error(language === 'arabic' ? 'يرجى إدخال بريد إلكتروني صالح' : 'Please enter a valid email address')
+        return
+      }
+    } else {
+      if (!isValidPhone(data.identifier)) {
+        toast.error(language === 'arabic' ? 'يرجى إدخال رقم هاتف صالح (10 أرقام)' : 'Please enter a valid 10-digit phone number')
+        return
+      }
+    }
+
     const langToSend = data.language ?? language
+    
+    // Normalize phone number if it's a phone
+    const normalizedIdentifier = hasAtSymbol ? data.identifier : normalizePhone(data.identifier)
+    
     setLoading(true)
     try {
       const response = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          identifier: data.identifier,
+          identifier: normalizedIdentifier,
           name: data.name,
           language: langToSend,
           type: otpType
@@ -85,7 +197,8 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
       const result = await response.json()
 
       if (response.ok) {
-        setFormData(data)
+        setFormData({ ...data, identifier: normalizedIdentifier })
+        setIdentifierValue(normalizedIdentifier)
         setOtpSent(true)
         setCurrentStep('otp')
         toast.success(language === 'arabic' ? result.messageAr : result.message)
@@ -93,7 +206,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
         toast.error(language === 'arabic' ? result.errorAr : result.error)
       }
     } catch (error) {
-      toast.error('Failed to send verification code')
+      toast.error(language === 'arabic' ? 'فشل في إرسال رمز التحقق' : 'Failed to send verification code')
     } finally {
       setLoading(false)
     }
@@ -146,11 +259,14 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
       } else {
         toast.error(language === 'arabic' ? verifyResult.errorAr : verifyResult.error)
         if (verifyResult.attemptsLeft !== undefined) {
-          toast.error(`Attempts left: ${verifyResult.attemptsLeft}`)
+          toast.error(language === 'arabic' 
+            ? `المحاولات المتبقية: ${verifyResult.attemptsLeft}`
+            : `Attempts left: ${verifyResult.attemptsLeft}`
+          )
         }
       }
     } catch (error) {
-      toast.error('Verification failed')
+      toast.error(language === 'arabic' ? 'فشل التحقق' : 'Verification failed')
     } finally {
       setLoading(false)
     }
@@ -181,7 +297,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
         toast.error(language === 'arabic' ? result.errorAr : result.error)
       }
     } catch (error) {
-      toast.error('Failed to resend code')
+      toast.error(language === 'arabic' ? 'فشل في إعادة إرسال الرمز' : 'Failed to resend code')
     } finally {
       setLoading(false)
     }
@@ -207,8 +323,6 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
       </div>
     )
   }
-  console.log('RegistrationComponent: requirePassword=', requirePassword, 'language=', language)
-
 
   if (currentStep === 'otp') {
     return (
@@ -304,7 +418,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
         </p>
       </div>
 
-      <div className="space-y-4">
+      <form onSubmit={handleSubmit(handleSendOtp)} className="space-y-4">
         {/* Name Field */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -315,7 +429,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
             <input
               {...register('name')}
               type="text"
-              className={`w-full ${isArabic ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500`}
+              className={`w-full ${isArabic ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
               placeholder={isArabic ? 'أدخل اسمك الكامل' : 'Enter your full name'}
             />
           </div>
@@ -338,11 +452,11 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
             <input
               {...register('identifier')}
               type="text"
-              className={`w-full ${isArabic ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500`}
+              className={`w-full ${isArabic ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border ${errors.identifier ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
               placeholder={isArabic ? 'example@email.com أو 0501234567' : 'example@email.com or 0501234567'}
             />
           </div>
-          {watchedIdentifier && (
+          {watchedIdentifier && !errors.identifier && (
             <p className="text-sm text-blue-600 mt-1">
               {isArabic ? 'سيتم الإرسال عبر:' : 'Will send via:'} {otpType === 'EMAIL' ? (isArabic ? 'البريد الإلكتروني' : 'Email') : (isArabic ? 'رسالة نصية' : 'SMS')}
             </p>
@@ -350,44 +464,50 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
           {errors.identifier && (
             <p className="text-red-500 text-sm mt-1">{errors.identifier.message}</p>
           )}
+          {/* Phone format hint */}
+          {watchedIdentifier && !watchedIdentifier.includes('@') && (
+            <p className="text-xs text-gray-500 mt-1">
+              {isArabic 
+                ? 'مثال: 0501234567 أو +966501234567' 
+                : 'Example: 0501234567 or +966501234567'
+              }
+            </p>
+          )}
         </div>
 
         {/* Password Field (Optional) */}
-        
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {isArabic ? 'كلمة المرور (اختياري)' : 'Password (Optional)'}
-            </label>
-            <div className="relative">
-              <Lock className={`absolute top-2.5 ${isArabic ? 'right-3' : 'left-3'} w-5 h-5 text-gray-400`} />
-              <input
-                {...register('password')}
-                type={showPassword ? 'text' : 'password'}
-                className={`w-full ${isArabic ? 'pr-10 pl-10' : 'pl-10 pr-10'} py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500`}
-                placeholder={isArabic ? 'أدخل كلمة مرور (اختياري)' : 'Enter password (optional)'}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className={`absolute top-2.5 ${isArabic ? 'left-3' : 'right-3'} text-gray-400 hover:text-gray-600`}
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-            )}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {isArabic ? 'كلمة المرور (اختياري)' : 'Password (Optional)'}
+          </label>
+          <div className="relative">
+            <Lock className={`absolute top-2.5 ${isArabic ? 'right-3' : 'left-3'} w-5 h-5 text-gray-400`} />
+            <input
+              {...register('password')}
+              type={showPassword ? 'text' : 'password'}
+              className={`w-full ${isArabic ? 'pr-10 pl-10' : 'pl-10 pr-10'} py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
+              placeholder={isArabic ? 'أدخل كلمة مرور (اختياري)' : 'Enter password (optional)'}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className={`absolute top-2.5 ${isArabic ? 'left-3' : 'right-3'} text-gray-400 hover:text-gray-600`}
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
-        
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+          )}
+        </div>
 
-        {/* Hidden language field (kept for form validation) */}
+        {/* Hidden language field */}
         <input {...register('language')} type="hidden" />
 
         {/* Submit Button */}
         <button
-         type="button" 
-          onClick={handleSubmit(handleSendOtp)}
-          disabled={loading}
+          type="submit"
+          disabled={loading || !isValid}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {loading ? (
@@ -413,7 +533,7 @@ export default function RegistrationComponent({ onSuccess, requirePassword = tru
             : 'We will send you a verification code to confirm your identity before proceeding'
           }
         </div>
-      </div>
+      </form>
     </div>
   )
 }

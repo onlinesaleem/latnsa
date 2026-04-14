@@ -10,7 +10,7 @@ const registerSchema = z.object({
   email: z.string().email('Invalid email format').optional(),
   phone: z.string().optional(),
   password: z.string().min(6, 'Password must be at least 6 characters').optional(),
-  language: z.enum(['english', 'arabic']).optional().default('english')
+  //language: z.enum(['english', 'arabic']).optional().default('english')
 }).refine(data => data.email || data.phone, {
   message: "Either email or phone is required"
 })
@@ -18,7 +18,7 @@ const registerSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, email, phone, password, language } = registerSchema.parse(body)
+    const { name, email, phone, password } = registerSchema.parse(body)
 
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
